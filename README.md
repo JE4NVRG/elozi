@@ -73,7 +73,7 @@ Claude Desktop (`claude_desktop_config.json`) or Cursor (`~/.cursor/mcp.json`):
   "mcpServers": {
     "elozi": {
       "command": "npx",
-      "args": ["-y", "elozi-mcp@0.1.0"],
+      "args": ["-y", "elozi-mcp@0.1.1"],
       "env": {
         "ELOZI_API_TOKEN": "elozi_svc_YOUR_TOKEN",
         "ELOZI_BASE_URL": "https://elozi.example.com"
@@ -88,7 +88,7 @@ Codex (`~/.codex/config.toml`):
 ```toml
 [mcp_servers.elozi]
 command = "npx"
-args = ["-y", "elozi-mcp@0.1.0"]
+args = ["-y", "elozi-mcp@0.1.1"]
 env = { ELOZI_API_TOKEN = "elozi_svc_YOUR_TOKEN", ELOZI_BASE_URL = "https://elozi.example.com" }
 ```
 

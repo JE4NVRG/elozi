@@ -33,7 +33,7 @@ Requires Node.js 22 or later. Replace the placeholder only in your private confi
   "mcpServers": {
     "elozi": {
       "command": "npx",
-      "args": ["-y", "elozi-mcp@0.1.0"],
+      "args": ["-y", "elozi-mcp@0.1.1"],
       "env": { "ELOZI_API_TOKEN": "elozi_svc_YOUR_TOKEN" }
     }
   }
@@ -53,7 +53,7 @@ claude mcp add --transport http elozi https://elozi.je4ndev.com/api/agent/mcp --
 Or through this bridge:
 
 ```bash
-claude mcp add elozi --env ELOZI_API_TOKEN="$ELOZI_API_TOKEN" -- npx -y elozi-mcp@0.1.0
+claude mcp add elozi --env ELOZI_API_TOKEN="$ELOZI_API_TOKEN" -- npx -y elozi-mcp@0.1.1
 ```
 
 Both commands write the token value into your Claude Code configuration; keep that file private.
@@ -67,7 +67,7 @@ Both commands write the token value into your Claude Code configuration; keep th
   "mcpServers": {
     "elozi": {
       "command": "npx",
-      "args": ["-y", "elozi-mcp@0.1.0"],
+      "args": ["-y", "elozi-mcp@0.1.1"],
       "env": { "ELOZI_API_TOKEN": "elozi_svc_YOUR_TOKEN" }
     }
   }
@@ -81,7 +81,7 @@ Both commands write the token value into your Claude Code configuration; keep th
 ```toml
 [mcp_servers.elozi]
 command = "npx"
-args = ["-y", "elozi-mcp@0.1.0"]
+args = ["-y", "elozi-mcp@0.1.1"]
 env = { ELOZI_API_TOKEN = "elozi_svc_YOUR_TOKEN" }
 ```
 
