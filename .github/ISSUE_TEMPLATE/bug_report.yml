@@ -1,0 +1,67 @@
+name: Bug report
+description: Something in Elozi does not work as documented.
+title: "bug: "
+labels: ["bug", "needs-triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting! Please use **synthetic data only**: no real phone numbers, e-mails, tokens, customer messages or screenshots with personal data.
+        Security issues: follow [SECURITY.md](https://github.com/JE4NVRG/elozi/blob/main/SECURITY.md) instead of this form.
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: What did you do, what did you expect and what happened instead?
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Start Elozi with `npm start`
+        2. Open Inbox and ...
+        3. See error
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options: [Inbox, Channels - WhatsApp, Channels - Telegram, Channels - Web chat, Channels - E-mail, Channels - Instagram/Messenger, AI agents / MCP, Flows and automation, Contacts, Metrics, Accounts / login, Install / Docker, Other]
+    validations:
+      required: true
+  - type: dropdown
+    id: install
+    attributes:
+      label: How do you run Elozi?
+      options: [Node.js (npm start), Docker, Hosted (elozi.je4ndev.com), Other]
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Elozi version / commit
+      description: Shown in Platform > Health and version, or `git rev-parse --short HEAD`.
+      placeholder: "0.68.1 / b4709c3"
+  - type: input
+    id: env
+    attributes:
+      label: Environment
+      placeholder: "Node 24.x, Ubuntu 24.04, Chrome 130"
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant logs
+      description: Remove tokens, phone numbers and personal data before pasting.
+      render: shell
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Checklist
+      options:
+        - label: I searched existing issues and discussions.
+          required: true
+        - label: This report contains no secrets or real personal data.
+          required: true

@@ -1,0 +1,40 @@
+name: Integration request
+description: Propose a new channel, LLM provider, automation tool or import source.
+title: "integration: "
+labels: ["integration", "needs-triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Check the [Integrations matrix and roadmap](https://github.com/JE4NVRG/elozi#integrations) first. Elozi only lists an integration as available when it is implemented in `src/`.
+  - type: dropdown
+    id: kind
+    attributes:
+      label: Kind of integration
+      options: [Messaging channel, LLM / AI provider, Notifications (Slack, Discord, ...), Automation (n8n, Zapier, Make, webhooks), Import / migration (e.g. Chatwoot), Authentication, Billing, Other]
+    validations:
+      required: true
+  - type: input
+    id: service
+    attributes:
+      label: Service
+      placeholder: "WhatsApp Business Cloud API"
+    validations:
+      required: true
+  - type: textarea
+    id: use-case
+    attributes:
+      label: Use case
+      description: What should your team be able to do with it inside Elozi?
+    validations:
+      required: true
+  - type: textarea
+    id: api
+    attributes:
+      label: Official API / docs
+      description: Links to the official API, auth model, rate limits and terms. Unofficial APIs must be flagged.
+  - type: dropdown
+    id: contribute
+    attributes:
+      label: Would you like to build it?
+      options: ["Yes, I can open a PR", "Maybe, with guidance", "No"]
