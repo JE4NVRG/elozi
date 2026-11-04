@@ -1,0 +1,1416 @@
+/*
+ * Shell do painel (FRONTEND-V2 §2.3, §5.1 e §8.2 commit 1e), gerado por shell-ui.js. Camada shell:
+ * vence o legado e os componentes sem !important. Só tokens de tokens.css (nenhuma cor literal,
+ * nenhum font-size literal, 12 px é o mínimo); breakpoints só em 600/900/1280/1600.
+ * - Abaixo de 900 px: gaveta com o menu, barra inferior de 56 px e topo de 52 px.
+ * - A partir de 900 px: menu fixo de 232 px ou trilho de 64 px. data-sh-layout="rail|full" vem de
+ *   shellLayout() (trilho forçado de 900 a 1279 px e em Atendimento abaixo de 1600 px).
+ * - As telas continuam em .main-shell > main#main-content.content: o shell desenha a própria moldura,
+ *   o deslocamento do menu e o espaçamento da área de conteúdo (P10), sem tocar em cor ou fonte das telas.
+ * - Movimento só em opacity e transform com --shift-*, que zeram com movimento reduzido (§3.7).
+ */
+@layer shell {
+  .sh-app {
+    --sh-offset: 0px;
+  }
+
+  .sh-app [hidden] {
+    display: none;
+  }
+
+  .sh-main {
+    min-width: 0;
+    margin-left: var(--sh-offset);
+    width: calc(100% - var(--sh-offset));
+  }
+
+  /* Área de conteúdo das telas (P10: antes em styles.css, frontend.css e workspace-shell.css), com o
+     gutter da página (§3.6). Atendimento e Equipe ocupam a área inteira pelas próprias folhas (screens). */
+  #main-content.content {
+    width: 100%;
+    max-width: 1800px;
+    margin-inline: auto;
+    padding: var(--space-8) var(--gutter) var(--space-12);
+  }
+
+  /* Pular para o conteúdo: primeiro foco da página, visível só quando focado. */
+  .sh-skip {
+    position: fixed;
+    z-index: var(--z-skip);
+    top: var(--space-2);
+    left: var(--space-2);
+    padding: var(--space-3) var(--space-4);
+    border: 0;
+    border-radius: var(--radius-md);
+    background: var(--text-1);
+    color: var(--surface-1);
+    font-family: var(--font-sans);
+    font-size: var(--fs-md);
+    line-height: var(--lh-md);
+    font-weight: var(--fw-semibold);
+    cursor: pointer;
+    transform: translateY(calc(-100% - var(--space-4)));
+    transition: none;
+  }
+
+  .sh-skip:focus {
+    transform: none;
+    outline: 2px solid var(--focus);
+    outline-offset: 2px;
+  }
+
+  /* Menu lateral. */
+  .sh-sidebar {
+    position: fixed;
+    inset: 0 auto 0 0;
+    z-index: var(--z-sidebar);
+    display: flex;
+    flex-direction: column;
+    width: var(--sidebar-width);
+    padding: var(--space-3) var(--space-2) var(--space-4);
+    border-right: 1px solid var(--border);
+    background: var(--surface-1);
+    color: var(--text-2);
+    font-family: var(--font-sans);
+  }
+
+  /* Seletor de escopo: logo da marca, workspace › empresa. */
+  .sh-scope {
+    position: relative;
+    flex: none;
+    margin-bottom: var(--space-3);
+  }
+
+  .sh-scope__trigger,
+  .sh-scope__static {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    width: 100%;
+    min-height: var(--control-lg);
+    margin: 0;
+    padding: var(--space-1) var(--space-2);
+    border: 1px solid transparent;
+    border-radius: var(--radius-md);
+    background: transparent;
+    color: var(--text-1);
+    font: inherit;
+    text-align: left;
+  }
+
+  .sh-scope__trigger {
+    cursor: pointer;
+    transition: background-color var(--dur-fast) var(--ease-standard);
+  }
+
+  .sh-scope__trigger:hover {
+    background: var(--bg-hover);
+  }
+
+  .sh-scope__trigger[aria-expanded="true"] {
+    border-color: var(--border);
+    background: var(--bg-pressed);
+  }
+
+  .sh-scope__trigger:focus-visible {
+    outline: 2px solid var(--focus);
+    outline-offset: -2px;
+  }
+
+  .sh-scope__text {
+    display: grid;
+    flex: 1;
+    min-width: 0;
+  }
+
+  .sh-scope__brand,
+  .sh-scope__line {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .sh-scope__brand {
+    color: var(--text-1);
+    font-size: var(--fs-md);
+    line-height: var(--lh-md);
+    font-weight: var(--fw-semibold);
+  }
+
+  .sh-scope__line {
+    color: var(--text-3);
+    font-size: var(--fs-xs);
+    line-height: var(--lh-xs);
+    font-weight: var(--fw-medium);
+  }
+
+  .sh-scope__chevron {
+    flex: none;
+    width: 16px;
+    height: 16px;
+    color: var(--text-3);
+  }
+
+  /* Popovers do shell (escopo e conta). */
+  .sh-popover {
+    position: absolute;
+    z-index: var(--z-popover);
+    width: min(320px, calc(100vw - 2 * var(--space-4)));
+    max-height: min(70vh, 560px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding: var(--space-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    background: var(--surface-1);
+    box-shadow: var(--shadow-3);
+    color: var(--text-1);
+    font-family: var(--font-sans);
+    font-size: var(--fs-md);
+    line-height: var(--lh-md);
+    text-align: left;
+    animation: sh-pop-in var(--dur-fast) var(--ease-enter);
+  }
+
+  @keyframes sh-pop-in {
+    from {
+      opacity: 0;
+      transform: translateY(calc(-1 * var(--shift-xs)));
+    }
+  }
+
+  .sh-scope__panel {
+    top: calc(100% + var(--space-1));
+    left: 0;
+  }
+
+  .sh-scope__search {
+    position: relative;
+    margin-bottom: var(--space-1);
+  }
+
+  .sh-scope__search-icon {
+    position: absolute;
+    top: 50%;
+    left: var(--space-3);
+    width: 16px;
+    height: 16px;
+    color: var(--text-3);
+    transform: translateY(-50%);
+    pointer-events: none;
+  }
+
+  .sh-scope__filter {
+    width: 100%;
+    min-height: var(--control-md);
+    margin: 0;
+    padding: 0 var(--space-3) 0 calc(var(--space-3) + 16px + var(--space-2));
+    border: 1px solid var(--border-control);
+    border-radius: var(--radius-sm);
+    background: var(--surface-1);
+    color: var(--text-1);
+    font-family: var(--font-sans);
+    font-size: var(--fs-md);
+    line-height: var(--lh-md);
+  }
+
+  .sh-scope__filter::placeholder {
+    color: var(--text-3);
+  }
+
+  .sh-scope__filter:focus-visible {
+    outline: 2px solid var(--focus);
+    outline-offset: 1px;
+  }
+
+  .sh-scope__group + .sh-scope__group {
+    margin-top: var(--space-1);
+    padding-top: var(--space-1);
+    border-top: 1px solid var(--border);
+  }
+
+  .sh-scope__heading,
+  .sh-nav__heading,
+  .sh-menu__legend {
+    color: var(--text-3);
+    font-size: var(--fs-xs);
+    line-height: var(--lh-xs);
+    font-weight: var(--fw-semibold);
+    letter-spacing: var(--ls-eyebrow);
+    text-transform: uppercase;
+  }
+
+  .sh-scope__heading {
+    margin: var(--space-2) var(--space-2) var(--space-1);
+  }
+
+  .sh-menu__hint {
+    display: block;
+    margin-top: var(--space-1);
+    color: var(--text-3);
+    font-size: var(--fs-xs);
+    line-height: var(--lh-xs);
+  }
+
+  .sh-scope__list,
+  .sh-nav__list,
+  .sh-menu__links,
+  .sh-sheet__list,
+  .sh-crumbs__list,
+  .sh-shortcuts {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .sh-option {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    width: 100%;
+    min-height: var(--target-touch);
+    margin: 0;
+    padding: var(--space-1) var(--space-2);
+    border: 0;
+    border-radius: var(--radius-md);
+    background: transparent;
+    color: var(--text-1);
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+    transition: background-color var(--dur-fast) var(--ease-standard);
+  }
+
+  .sh-option:hover {
+    background: var(--bg-hover);
+  }
+
+  .sh-option[aria-current="true"] {
+    background: var(--bg-selected);
+    color: var(--accent-soft-text);
+  }
+
+  .sh-option:focus-visible {
+    outline: 2px solid var(--focus);
+    outline-offset: -2px;
+  }
+
+  .sh-option__name,
+  .sh-option .ui-company {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .sh-option__name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .sh-option__check {
+    flex: none;
+    width: 16px;
+    height: 16px;
+    color: var(--accent-text);
+  }
+
+  .sh-scope__note,
+  .sh-scope__empty {
+    margin: var(--space-2);
+    color: var(--text-2);
+    font-size: var(--fs-sm);
+    line-height: var(--lh-sm);
+  }
+
+  /* Menu: seções do nav-config com ícones únicos; item atual com fundo suave e barra de 2 px. */
+  .sh-nav {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: thin;
+  }
+
+  .sh-nav__section + .sh-nav__section {
+    margin-top: var(--space-4);
+  }
+
+  /* Configurações fica separada, no pé do menu quando há espaço (§5.1). */
+  .sh-nav__section[data-section="system"] {
+    padding-top: var(--space-3);
+    border-top: 1px solid var(--border);
+  }
+
+  .sh-nav__section + .sh-nav__section[data-section="system"] {
+    margin-top: auto;
+  }
+
+  .sh-nav__section:has(+ .sh-nav__section[data-section="system"]) {
+    margin-bottom: var(--space-4);
+  }
+
+  .sh-nav__heading {
+    margin: 0 var(--space-3) var(--space-1);
+  }
+
+  .sh-nav__item {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    min-height: var(--target-touch);
+    padding: 0 var(--space-3);
+    border-radius: var(--radius-md);
+    color: var(--text-2);
+    font-size: var(--fs-md);
+    line-height: var(--lh-md);
+    font-weight: var(--fw-medium);
+    text-decoration: none;
+    transition: background-color var(--dur-fast) var(--ease-standard), color var(--dur-fast) var(--ease-standard);
+  }
+
+  .sh-nav__item:hover {
+    background: var(--bg-hover);
+    color: var(--text-1);
+  }
+
+  .sh-nav__item[aria-current="page"] {
+    background: var(--bg-selected);
+    color: var(--accent-soft-text);
+    font-weight: var(--fw-semibold);
+  }
+
+  .sh-nav__item[aria-current="page"]::before {
+    content: "";
+    position: absolute;
+    top: var(--space-2);
+    bottom: var(--space-2);
+    left: 0;
+    width: 2px;
+    border-radius: var(--radius-full);
+    background: var(--accent);
+  }
+
+  .sh-nav__item:focus-visible {
+    outline: 2px solid var(--focus);
+    outline-offset: -2px;
+  }
+
+  .sh-nav__icon {
+    flex: none;
+    width: 20px;
+    height: 20px;
+  }
+
+  .sh-nav__label {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .sh-nav__entry--sub .sh-nav__item {
+    padding-left: calc(var(--space-3) + 20px + var(--space-3));
+    font-size: var(--fs-sm);
+    line-height: var(--lh-sm);
+  }
+
+  .sh-nav__entry--sub .sh-nav__icon {
+    display: none;
+  }
+
+  /* Contador (P2 preenche "não lidas para mim", Pendências e Equipe). */
+  .sh-count {
+    display: inline-grid;
+    place-items: center;
+    flex: none;
+    min-width: 20px;
+    height: 20px;
+    padding: 0 var(--space-1);
+    border-radius: var(--radius-full);
+    background: var(--accent);
+    color: var(--on-accent);
+    box-shadow: inset 0 0 0 1px var(--accent-edge);
+    font-size: var(--fs-xs);
+    line-height: var(--lh-xs);
+    font-weight: var(--fw-semibold);
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Topo: trilha, busca, Pendências, Equipe e o avatar com o menu da conta. */
+  .sh-topbar {
+    position: relative;
+    z-index: var(--z-topbar);
+    display: flex;
+    flex: none;
+    align-items: center;
+    gap: var(--space-2);
+    height: var(--topbar-height);
+    padding: 0 var(--gutter);
+    border-bottom: 1px solid var(--border);
+    background: var(--surface-1);
+    color: var(--text-2);
+    font-family: var(--font-sans);
+  }
+
+  .sh-iconbtn {
+    position: relative;
+    display: inline-grid;
+    place-items: center;
+    flex: none;
+    width: var(--target-touch);
+    height: var(--target-touch);
+    margin: 0;
+    padding: 0;
+    border: 1px solid transparent;
+    border-radius: var(--radius-md);
+    background: transparent;
+    color: var(--text-2);
+    cursor: pointer;
+    transition: background-color var(--dur-fast) var(--ease-standard), color var(--dur-fast) var(--ease-standard);
+  }
+
+  .sh-iconbtn:hover {
+    background: var(--bg-hover);
+    color: var(--text-1);
+  }
+
+  .sh-iconbtn:focus-visible {
+    outline: 2px solid var(--focus);
+    outline-offset: 2px;
+  }
+
+  .sh-iconbtn .icon {
+    width: 20px;
+    height: 20px;
+  }
+
+  .sh-iconbtn .sh-count {
+    position: absolute;
+    top: 0;
+    right: 0;
+  }
+
+  .sh-crumbs {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .sh-crumbs__list {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    min-width: 0;
+  }
+
+  .sh-crumbs__item {
+    min-width: 0;
+    overflow: hidden;
+    color: var(--text-3);
+    font-size: var(--fs-sm);
+    line-height: var(--lh-sm);
+    font-weight: var(--fw-medium);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .sh-crumbs__item + .sh-crumbs__item::before {
+    content: "›";
+    content: "›" / "";
+    margin-right: var(--space-2);
+    color: var(--text-3);
+  }
+
+  .sh-crumbs__item[aria-current="page"] {
+    color: var(--text-1);
+    font-weight: var(--fw-semibold);
+  }
+
+  .sh-scopechip {
+    display: none;
+  }
+
+  .sh-topbar__actions {
+    display: flex;
+    flex: none;
+    align-items: center;
+    gap: var(--space-1);
+    margin-left: auto;
+  }
+
+  .sh-search {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    min-width: 0;
+    height: var(--control-md);
+    margin: 0 var(--space-1) 0 0;
+    padding: 0 var(--space-2) 0 var(--space-3);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    background: var(--surface-2);
+    color: var(--text-3);
+    font-family: var(--font-sans);
+    font-size: var(--fs-sm);
+    line-height: var(--lh-sm);
+    cursor: pointer;
+    transition: border-color var(--dur-fast) var(--ease-standard), color var(--dur-fast) var(--ease-standard);
+  }
+
+  .sh-search:hover {
+    border-color: var(--border-strong);
+    color: var(--text-2);
+  }
+
+  .sh-search:focus-visible {
+    outline: 2px solid var(--focus);
+    outline-offset: 2px;
+  }
+
+  .sh-search .icon {
+    flex: none;
+    width: 18px;
+    height: 18px;
+  }
+
+  .sh-search__label {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-align: left;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .sh-account {
+    position: relative;
+    flex: none;
+  }
+
+  .sh-account__trigger {
+    display: inline-grid;
+    place-items: center;
+    width: var(--target-touch);
+    height: var(--target-touch);
+    margin: 0;
+    padding: 0;
+    border: 0;
+    border-radius: var(--radius-full);
+    background: transparent;
+    cursor: pointer;
+  }
+
+  .sh-account__trigger:focus-visible {
+    outline: 2px solid var(--focus);
+    outline-offset: 2px;
+  }
+
+  .sh-account__panel {
+    top: calc(100% + var(--space-2));
+    right: 0;
+  }
+
+  .sh-account__head {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    padding: var(--space-2) var(--space-2) var(--space-3);
+  }
+
+  .sh-account__who {
+    display: grid;
+    min-width: 0;
+    margin: 0;
+  }
+
+  .sh-account__who strong {
+    overflow: hidden;
+    color: var(--text-1);
+    font-size: var(--fs-md);
+    line-height: var(--lh-md);
+    font-weight: var(--fw-semibold);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .sh-account__who small {
+    color: var(--text-3);
+    font-size: var(--fs-xs);
+    line-height: var(--lh-xs);
+  }
+
+  .sh-menu__group {
+    min-width: 0;
+    margin: 0;
+    padding: var(--space-3) var(--space-2);
+    border: 0;
+    border-top: 1px solid var(--border);
+  }
+
+  .sh-menu__legend {
+    float: left;
+    width: 100%;
+    margin: 0 0 var(--space-1);
+    padding: 0;
+  }
+
+  .sh-menu__group .ui-seg {
+    display: grid;
+    clear: both;
+    width: 100%;
+  }
+
+  .sh-radio {
+    display: flex;
+    clear: both;
+    align-items: center;
+    gap: var(--space-2);
+    min-height: var(--target-touch);
+    margin: 0;
+    padding: 0 var(--space-2);
+    border-radius: var(--radius-md);
+    color: var(--text-1);
+    font-size: var(--fs-md);
+    line-height: var(--lh-md);
+    font-weight: var(--fw-medium);
+    cursor: pointer;
+  }
+
+  .sh-radio:hover {
+    background: var(--bg-hover);
+  }
+
+  .sh-radio__input {
+    flex: none;
+    width: 16px;
+    height: 16px;
+    margin: 0;
+    accent-color: var(--accent);
+    cursor: pointer;
+  }
+
+  .sh-radio__input:focus-visible {
+    outline: 2px solid var(--focus);
+    outline-offset: 2px;
+  }
+
+  /* O legado desenha contorno em qualquer input:focus; no menu da conta só o foco por teclado aparece. */
+  .sh-radio__input:focus:not(:focus-visible) {
+    outline: none;
+  }
+
+  .sh-presence {
+    flex: none;
+    width: 10px;
+    height: 10px;
+    border-radius: var(--radius-full);
+    background: var(--presence-available);
+  }
+
+  .sh-presence[data-presence="busy"] {
+    background: var(--presence-busy);
+  }
+
+  .sh-presence[data-presence="away"] {
+    background: var(--presence-away);
+  }
+
+  .sh-presence[data-presence="offline"] {
+    background: var(--presence-offline);
+  }
+
+  .sh-menu__links {
+    padding-top: var(--space-2);
+    border-top: 1px solid var(--border);
+  }
+
+  .sh-menu__link,
+  .sh-sheet__item {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    width: 100%;
+    min-height: var(--target-touch);
+    margin: 0;
+    padding: 0 var(--space-3);
+    border: 0;
+    border-radius: var(--radius-md);
+    background: transparent;
+    color: var(--text-1);
+    font-family: var(--font-sans);
+    font-size: var(--fs-md);
+    line-height: var(--lh-md);
+    font-weight: var(--fw-medium);
+    text-align: left;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background-color var(--dur-fast) var(--ease-standard);
+  }
+
+  .sh-menu__link:hover,
+  .sh-sheet__item:hover {
+    background: var(--bg-hover);
+  }
+
+  .sh-menu__link:focus-visible,
+  .sh-sheet__item:focus-visible {
+    outline: 2px solid var(--focus);
+    outline-offset: -2px;
+  }
+
+  .sh-menu__link .icon,
+  .sh-sheet__item .icon {
+    flex: none;
+    width: 18px;
+    height: 18px;
+    color: var(--text-2);
+  }
+
+  .sh-sheet__item[aria-current="page"] {
+    background: var(--bg-selected);
+    color: var(--accent-soft-text);
+  }
+
+  /* Botões do shell desabilitados durante uma ação não piscam (o legado aplica opacidade global). */
+  .sh-iconbtn:disabled,
+  .sh-option:disabled,
+  .sh-menu__link:disabled,
+  .sh-sheet__item:disabled,
+  .sh-bottombar__item:disabled,
+  .sh-search:disabled {
+    opacity: 1;
+    cursor: progress;
+  }
+
+  /* Faixas fixas acima de <main>: suporte temporário, ambiente de teste (P2: conexão, cota de IA). */
+  .sh-banners {
+    display: grid;
+    /* minmax(0, 1fr): a faixa de uma linha (celular) não alarga a coluna até o texto inteiro. */
+    grid-template-columns: minmax(0, 1fr);
+    flex: none;
+    gap: var(--space-2);
+    padding: var(--space-3) var(--gutter) 0;
+  }
+
+  .sh-banners:empty {
+    display: none;
+  }
+
+  /* Faixa compacta (P10): o botão ⌄ só existe abaixo de 600 px, onde a faixa ocupa uma linha. */
+  .sh-banner__toggle {
+    display: none;
+  }
+
+  /* Folha de atalhos (Menu da conta › Atalhos do teclado). */
+  .sh-shortcuts {
+    display: grid;
+    gap: var(--space-2);
+    margin-bottom: var(--space-2);
+  }
+
+  .sh-shortcuts__row {
+    display: grid;
+    grid-template-columns: minmax(96px, auto) 1fr;
+    align-items: center;
+    gap: var(--space-3);
+    color: var(--text-1);
+    font-size: var(--fs-md);
+    line-height: var(--lh-md);
+  }
+
+  .sh-shortcuts__keys {
+    display: inline-flex;
+    gap: var(--space-1);
+  }
+
+  /* Barra inferior e folha "Mais" (abaixo de 900 px). */
+  .sh-bottombar {
+    position: fixed;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: var(--z-sidebar);
+    display: flex;
+    align-items: stretch;
+    height: calc(var(--bottombar-height) + env(safe-area-inset-bottom, 0px));
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+    border-top: 1px solid var(--border);
+    background: var(--surface-1);
+    font-family: var(--font-sans);
+  }
+
+  .sh-bottombar__item {
+    position: relative;
+    display: flex;
+    flex: 1 1 0;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-0_5);
+    min-width: 0;
+    margin: 0;
+    padding: var(--space-1) var(--space-1) 0;
+    border: 0;
+    background: transparent;
+    color: var(--text-2);
+    font-family: var(--font-sans);
+    font-size: var(--fs-xs);
+    line-height: var(--lh-xs);
+    font-weight: var(--fw-medium);
+    text-decoration: none;
+    cursor: pointer;
+  }
+
+  .sh-bottombar__item .icon {
+    width: 22px;
+    height: 22px;
+  }
+
+  .sh-bottombar__label {
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .sh-bottombar__item[aria-current="page"],
+  .sh-bottombar__item[aria-expanded="true"] {
+    color: var(--accent-text);
+    font-weight: var(--fw-semibold);
+  }
+
+  .sh-bottombar__item:focus-visible {
+    outline: 2px solid var(--focus);
+    outline-offset: -2px;
+  }
+
+  .sh-bottombar__item .sh-count {
+    position: absolute;
+    top: var(--space-1);
+    left: calc(50% + var(--space-2));
+  }
+
+  .sh-sheet {
+    position: fixed;
+    right: var(--space-2);
+    bottom: calc(var(--bottombar-height) + env(safe-area-inset-bottom, 0px) + var(--space-2));
+    left: var(--space-2);
+    z-index: var(--z-drawer);
+    max-height: 60vh;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding: var(--space-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-xl);
+    background: var(--surface-1);
+    box-shadow: var(--shadow-4);
+    animation: sh-sheet-in var(--dur-slow) var(--ease-enter);
+  }
+
+  @keyframes sh-sheet-in {
+    from {
+      opacity: 0;
+      transform: translateY(var(--shift-lg));
+    }
+  }
+
+  /* Chat expandido (chat-layout.js): só a conversa fica na tela; a faixa de suporte permanece. */
+  .sh-app.chat-expanded {
+    --sh-offset: 0px;
+  }
+
+  .sh-app.chat-expanded .sh-sidebar,
+  .sh-app.chat-expanded .sh-scrim,
+  .sh-app.chat-expanded .sh-topbar,
+  .sh-app.chat-expanded .sh-bottombar,
+  .sh-app.chat-expanded .sh-sheet,
+  .sh-app.chat-expanded .sh-banners [data-banner="sandbox"],
+  .sh-app.chat-expanded .sh-banners [data-banner="menu-notice"] {
+    display: none;
+  }
+
+  /* Dentro de uma conversa aberta no celular a barra inferior some (§2.3). */
+  .sh-app:has(.inbox-workspace.mobile-chat) .sh-bottombar,
+  .sh-app:has(.inbox-workspace.mobile-chat) .sh-sheet {
+    display: none;
+  }
+
+  @media (max-width: 899.98px) {
+    .sh-sidebar {
+      z-index: var(--z-drawer);
+      width: min(300px, calc(100vw - var(--space-12)));
+      overflow-y: auto;
+      box-shadow: var(--shadow-4);
+      opacity: 0;
+      visibility: hidden;
+      transform: translateX(calc(-1 * var(--shift-lg)));
+      transition: opacity var(--dur-base) var(--ease-exit), transform var(--dur-base) var(--ease-exit), visibility 0s linear var(--dur-base);
+    }
+
+    .sh-sidebar[data-state="open"] {
+      opacity: 1;
+      visibility: visible;
+      transform: none;
+      transition: opacity var(--dur-slow) var(--ease-enter), transform var(--dur-slow) var(--ease-enter);
+    }
+
+    .sh-nav {
+      flex: 1 0 auto;
+      overflow: visible;
+    }
+
+    .sh-scrim {
+      position: fixed;
+      inset: 0;
+      z-index: calc(var(--z-drawer) - 1);
+      margin: 0;
+      padding: 0;
+      border: 0;
+      background: var(--scrim);
+    }
+
+    .sh-scope__panel {
+      position: static;
+      width: auto;
+      max-height: none;
+      margin-top: var(--space-1);
+      box-shadow: none;
+      animation: none;
+    }
+
+    .sh-scope__filter {
+      font-size: var(--fs-lg);
+    }
+
+    .sh-main {
+      padding-bottom: calc(var(--bottombar-height) + env(safe-area-inset-bottom, 0px));
+    }
+
+    .sh-app:has(.inbox-workspace.mobile-chat) .sh-main,
+    .sh-app.chat-expanded .sh-main {
+      padding-bottom: 0;
+    }
+
+    .sh-topbar {
+      gap: var(--space-1);
+      padding-inline: var(--space-2);
+    }
+
+    .sh-topbar__rail,
+    .sh-topbar__pending,
+    .sh-topbar__team {
+      display: none;
+    }
+
+    .sh-crumbs__item:not(:last-child) {
+      display: none;
+    }
+
+    .sh-crumbs__item:last-child {
+      color: var(--text-1);
+      font-size: var(--fs-lg);
+      line-height: var(--lh-lg);
+      font-weight: var(--fw-semibold);
+    }
+
+    .sh-crumbs__item + .sh-crumbs__item::before {
+      content: none;
+    }
+
+    .sh-scopechip {
+      display: inline-flex;
+      flex: 0 1 auto;
+      align-items: center;
+      gap: var(--space-1);
+      max-width: 38vw;
+      min-width: 0;
+      min-height: var(--control-sm);
+      margin: 0;
+      padding: 0 var(--space-2) 0 var(--space-3);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-full);
+      background: var(--surface-2);
+      color: var(--text-2);
+      font-family: var(--font-sans);
+      font-size: var(--fs-xs);
+      line-height: var(--lh-xs);
+      font-weight: var(--fw-semibold);
+    }
+
+    button.sh-scopechip {
+      min-height: var(--target-touch);
+      border-color: transparent;
+      background: transparent;
+      cursor: pointer;
+    }
+
+    button.sh-scopechip:focus-visible {
+      outline: 2px solid var(--focus);
+      outline-offset: -2px;
+    }
+
+    .sh-scopechip__label {
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    button.sh-scopechip .sh-scopechip__label {
+      padding: var(--space-1) var(--space-2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-full);
+      background: var(--surface-2);
+    }
+
+    .sh-scopechip .icon {
+      flex: none;
+      width: 14px;
+      height: 14px;
+    }
+
+    .sh-search {
+      justify-content: center;
+      width: var(--target-touch);
+      height: var(--target-touch);
+      margin: 0;
+      padding: 0;
+      border-color: transparent;
+      background: transparent;
+      color: var(--text-2);
+    }
+
+    .sh-search__label,
+    .sh-search .ui-kbd {
+      display: none;
+    }
+
+    .sh-popover {
+      max-height: calc(100dvh - var(--topbar-height) - var(--bottombar-height) - var(--space-8));
+    }
+
+    .ui-toasts {
+      bottom: calc(var(--bottombar-height) + env(safe-area-inset-bottom, 0px) + var(--space-4));
+    }
+
+    body:has(.inbox-workspace.mobile-chat) .ui-toasts,
+    body:has(.sh-app.chat-expanded) .ui-toasts {
+      bottom: calc(var(--space-4) + env(safe-area-inset-bottom, 0px));
+    }
+  }
+
+  @media (min-width: 900px) {
+    .sh-app {
+      --sh-offset: var(--sidebar-width);
+    }
+
+    .sh-app[data-sh-layout="rail"] {
+      --sh-offset: var(--sidebar-rail);
+    }
+
+    .sh-app.chat-expanded {
+      --sh-offset: 0px;
+    }
+
+    .sh-scrim,
+    .sh-topbar__menu,
+    .sh-bottombar,
+    .sh-sheet {
+      display: none;
+    }
+
+    .sh-nav__item,
+    .sh-option,
+    .sh-menu__link {
+      min-height: var(--control-md);
+    }
+
+    .sh-radio {
+      min-height: var(--control-sm);
+    }
+
+    .sh-iconbtn,
+    .sh-account__trigger {
+      width: var(--control-md);
+      height: var(--control-md);
+    }
+
+    /* Trilho de 64 px: só ícones; o rótulo vira dica ao passar o ponteiro ou focar. */
+    .sh-app[data-sh-layout="rail"] .sh-sidebar {
+      width: var(--sidebar-rail);
+      padding-inline: var(--space-2);
+    }
+
+    .sh-app[data-sh-layout="rail"] .sh-scope__text,
+    .sh-app[data-sh-layout="rail"] .sh-scope__chevron,
+    .sh-app[data-sh-layout="rail"] .sh-nav__heading {
+      display: none;
+    }
+
+    .sh-app[data-sh-layout="rail"] .sh-scope__trigger,
+    .sh-app[data-sh-layout="rail"] .sh-scope__static {
+      justify-content: center;
+      padding: var(--space-1);
+    }
+
+    .sh-app[data-sh-layout="rail"] .sh-scope__panel {
+      top: 0;
+      left: calc(100% + var(--space-2));
+    }
+
+    .sh-app[data-sh-layout="rail"] .sh-nav {
+      overflow: visible;
+    }
+
+    .sh-app[data-sh-layout="rail"] .sh-nav__section + .sh-nav__section {
+      margin-top: var(--space-2);
+      padding-top: var(--space-2);
+      border-top: 1px solid var(--border);
+    }
+
+    .sh-app[data-sh-layout="rail"] .sh-nav__section + .sh-nav__section[data-section="system"] {
+      margin-top: auto;
+    }
+
+    .sh-app[data-sh-layout="rail"] .sh-nav__item,
+    .sh-app[data-sh-layout="rail"] .sh-nav__entry--sub .sh-nav__item {
+      justify-content: center;
+      min-height: var(--control-lg);
+      padding: 0;
+    }
+
+    .sh-app[data-sh-layout="rail"] .sh-nav__entry--sub .sh-nav__icon {
+      display: block;
+      width: 18px;
+      height: 18px;
+    }
+
+    .sh-app[data-sh-layout="rail"] .sh-nav__label {
+      position: absolute;
+      top: 50%;
+      left: calc(100% + var(--space-2));
+      z-index: var(--z-tooltip);
+      flex: none;
+      padding: var(--space-1) var(--space-2);
+      border-radius: var(--radius-sm);
+      background: var(--text-1);
+      color: var(--surface-1);
+      box-shadow: var(--shadow-2);
+      font-size: var(--fs-xs);
+      line-height: var(--lh-xs);
+      font-weight: var(--fw-semibold);
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(-50%);
+      transition: opacity var(--dur-fast) var(--ease-standard);
+    }
+
+    .sh-app[data-sh-layout="rail"] .sh-nav__item:hover .sh-nav__label {
+      opacity: 1;
+      transition-delay: 500ms;
+    }
+
+    .sh-app[data-sh-layout="rail"] .sh-nav__item:focus-visible .sh-nav__label {
+      opacity: 1;
+    }
+
+    .sh-app[data-sh-layout="rail"] .sh-nav__item .sh-count {
+      position: absolute;
+      top: var(--space-1);
+      right: var(--space-1);
+      width: 8px;
+      min-width: 8px;
+      height: 8px;
+      padding: 0;
+      overflow: hidden;
+      color: transparent;
+    }
+  }
+
+  /* Telas baixas com trilho: o menu volta a rolar (as dicas ficam recortadas, os nomes acessíveis não). */
+  @media (min-width: 900px) and (max-height: 640px) {
+    .sh-app[data-sh-layout="rail"] .sh-nav {
+      overflow-y: auto;
+    }
+  }
+
+  @media (min-width: 1280px) {
+    .sh-search {
+      width: 280px;
+    }
+  }
+
+  /*
+   * Celular estreito (< 600 px, P10): a área de conteúdo sobe e cada faixa (suporte, ambiente de teste,
+   * aviso do menu) fica numa linha com reticências; o botão ⌄ mostra o texto inteiro (data-state).
+   */
+  @media (max-width: 599.98px) {
+    .sh-app:has(.inbox-workspace.mobile-chat) .sh-banners [data-banner="menu-notice"] {
+      display: none;
+    }
+
+    .sh-app:has(.inbox-workspace.mobile-chat) .sh-banners:not(:has(> :not([data-banner="menu-notice"]))) {
+      display: none;
+    }
+
+    #main-content.content {
+      padding-top: var(--space-6);
+    }
+
+    .sh-banners {
+      gap: var(--space-1);
+      padding-top: var(--space-2);
+    }
+
+    .sh-banner {
+      flex-wrap: nowrap;
+      gap: var(--space-2);
+      min-height: var(--target-touch);
+      padding: 0 0 0 var(--space-3);
+    }
+
+    .sh-banner .ui-banner__text {
+      min-width: 0;
+    }
+
+    .sh-banner[data-state="collapsed"] .ui-banner__text {
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
+
+    .sh-banner[data-state="expanded"] {
+      padding-block: var(--space-2);
+    }
+
+    .sh-banner > .ui-btn,
+    .sh-banner > .ui-iconbtn {
+      flex: none;
+    }
+
+    .sh-banner__toggle {
+      display: inline-grid;
+      flex: none;
+      place-items: center;
+      width: var(--target-touch);
+      height: var(--target-touch);
+      margin: 0;
+      padding: 0;
+      border: 0;
+      border-radius: var(--radius-md);
+      background: transparent;
+      color: var(--text-2);
+      cursor: pointer;
+    }
+
+    .sh-banner__toggle .icon {
+      width: 18px;
+      height: 18px;
+    }
+
+    .sh-banner[data-state="expanded"] .sh-banner__toggle .icon {
+      transform: rotate(180deg);
+    }
+
+    .sh-banner__toggle:focus-visible {
+      outline: 2px solid var(--focus);
+      outline-offset: -2px;
+    }
+
+    /* Faixas de outros módulos (convite para ativar avisos, notify.js): texto em até duas linhas
+       (inteiro para leitores de tela) e botões compactos ao lado. */
+    .sh-banners > .ui-banner:not(.sh-banner) {
+      gap: var(--space-1) var(--space-2);
+      padding: var(--space-2) var(--space-3);
+    }
+
+    .sh-banners > .ui-banner:not(.sh-banner) .ui-banner__text {
+      display: -webkit-box;
+      overflow: hidden;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 2;
+    }
+  }
+
+  /* Toque a partir de 900 px (tablets): alvos de 44 px, como nos componentes. */
+  @media (min-width: 900px) and (pointer: coarse) {
+    .sh-iconbtn,
+    .sh-account__trigger {
+      width: var(--target-touch);
+      height: var(--target-touch);
+    }
+
+    .sh-nav__item,
+    .sh-option,
+    .sh-menu__link,
+    .sh-radio {
+      min-height: var(--target-touch);
+    }
+  }
+
+  /*
+   * Troca de tela (§6, P10): app.js usa document.startViewTransition só em navegação explícita e com
+   * motionOK(). A moldura (menu, topo e barra inferior) fica parada com nome fixo; o conteúdo faz
+   * crossfade com um passo curto. Movimento reduzido (sistema ou "Reduzidas"): sem animação.
+   */
+  .sh-sidebar {
+    view-transition-name: sh-sidebar;
+  }
+
+  .sh-topbar {
+    view-transition-name: sh-topbar;
+  }
+
+  .sh-bottombar {
+    view-transition-name: sh-bottombar;
+  }
+
+  .sh-main > main {
+    view-transition-name: sh-content;
+  }
+
+  ::view-transition-group(*) {
+    animation-duration: var(--dur-fast);
+    animation-timing-function: var(--ease-standard);
+  }
+
+  ::view-transition-old(sh-content) {
+    animation: sh-content-out var(--dur-fast) var(--ease-exit) both;
+  }
+
+  ::view-transition-new(sh-content) {
+    animation: sh-content-in var(--dur-base) var(--ease-enter) both;
+  }
+
+  @keyframes sh-content-out {
+    to { opacity: 0; }
+  }
+
+  @keyframes sh-content-in {
+    from { opacity: 0; transform: translateY(var(--shift-xs)); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    ::view-transition-group(*),
+    ::view-transition-old(*),
+    ::view-transition-new(*) {
+      animation: none;
+    }
+  }
+
+  :root[data-motion="reduced"]::view-transition-group(*),
+  :root[data-motion="reduced"]::view-transition-old(*),
+  :root[data-motion="reduced"]::view-transition-new(*) {
+    animation: none;
+  }
+
+  /* Modo privacidade (menu da conta, theme-prefs.js): desfoca nomes, telefones, fotos e prévias de clientes para uma
+     demonstração ou tela compartilhada. Muda só a tela; os dados que a pessoa pode ler e a API continuam os mesmos. */
+  :root[data-privacy="on"] :is([data-pii], .pg-inbox__row-name, .pg-inbox__row-preview, .pg-inbox__row-avatar, .pg-inbox__head-avatar, .pg-inbox__name, .pg-inbox__person .ui-avatar, .pg-inbox__person > .avatar) {
+    filter: blur(7px);
+    user-select: none;
+  }
+}

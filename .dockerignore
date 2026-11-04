@@ -1,0 +1,10 @@
+# Runtime allowlist: dados, segredos, testes e evidências ficam fora do build.
+**
+!Dockerfile
+!.dockerignore
+!package.json
+!package-lock.json
+!src/
+!src/**
+!public/
+!public/**

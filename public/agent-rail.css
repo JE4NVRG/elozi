@@ -1,0 +1,873 @@
+/* Agent rail of the conversation (FRONTEND-V2 §5.2.3, §6, §8.5). Owned by P4.
+   Components (.ui-receipt, .ui-approval, .ui-draft, .ui-agent-glyph) in the components layer; the rail
+   above the composer (.pg-rail) and the Agente tab (.pg-rail-tab) in the screens layer.
+   Tokens only (no hex, no literal font-size, 12 px minimum), breakpoints by min-width in
+   600/900/1280/1600, no !important. Motion only explains a state change: opacity, transform with the
+   --shift/--scale tokens and color; the "gerando" dots are the only loop and stop with reduced motion,
+   where the text stays static ("… está preparando… 4 s") and the approval bar stops shrinking. */
+@layer components {
+  /* Receipt: a narrow line with the agent rule (✦ Consulta automática · Ficha do contato · 0,4 s · ver). */
+  .ui-receipt {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-1) var(--space-2);
+    max-width: 100%;
+    margin: 0;
+    padding: var(--space-1) var(--space-3);
+    border-left: 2px solid var(--agent-border);
+    border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+    background: var(--surface-1);
+    color: var(--agent-text);
+    font-size: var(--fs-xs);
+    line-height: var(--lh-xs);
+    font-weight: var(--fw-medium);
+    font-variant-numeric: tabular-nums;
+  }
+
+  details.ui-receipt {
+    display: block;
+  }
+
+  .ui-receipt__summary {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-1) var(--space-2);
+    cursor: pointer;
+    list-style: none;
+  }
+
+  .ui-receipt__summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .ui-receipt__summary:focus-visible,
+  .ui-receipt:focus-visible {
+    outline: 2px solid var(--focus);
+    outline-offset: 2px;
+  }
+
+  .ui-receipt__mark {
+    display: inline-flex;
+    align-items: center;
+  }
+
+  .ui-receipt__mark .icon {
+    width: 14px;
+    height: 14px;
+  }
+
+  .ui-receipt__label {
+    overflow-wrap: anywhere;
+  }
+
+  .ui-receipt__more {
+    font-weight: var(--fw-semibold);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+
+  .ui-receipt__more::after {
+    content: " ▸";
+  }
+
+  details[open] > .ui-receipt__summary .ui-receipt__more::after {
+    content: " ▾";
+  }
+
+  .ui-receipt__error {
+    color: var(--danger-text);
+    font-weight: var(--fw-semibold);
+  }
+
+  .ui-receipt__result {
+    max-height: 240px;
+    margin: var(--space-2) 0 0;
+    padding: var(--space-2) var(--space-3);
+    overflow: auto;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--surface-2);
+    color: var(--text-1);
+    font-family: var(--font-mono);
+    font-size: var(--fs-mono);
+    line-height: var(--lh-mono);
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+  }
+
+  .ui-receipt__note {
+    display: block;
+    margin-top: var(--space-1);
+    color: var(--text-2);
+    font-size: var(--fs-xs);
+  }
+
+  .ui-receipt[data-kind="approved"] .ui-receipt__mark {
+    color: var(--success-text);
+  }
+
+  .ui-receipt[data-kind="rejected"] {
+    border-left-color: var(--border-strong);
+    color: var(--text-2);
+  }
+
+  .ui-receipt[data-enter] {
+    animation: pg-rail-fade var(--dur-slow) var(--ease-enter);
+  }
+
+  .ui-receipt[data-enter] .ui-receipt__check path {
+    stroke-dasharray: 24;
+    stroke-dashoffset: 24;
+    animation: pg-rail-draw var(--dur-slow) var(--ease-enter) var(--dur-base) forwards;
+  }
+
+  /* Approval card: blocking, no shortcut; the expiry bar shrinks linearly over the remaining time. */
+  .ui-approval {
+    display: grid;
+    gap: var(--space-2);
+    padding: var(--space-3);
+    border: 1px solid var(--warning-border);
+    border-radius: var(--radius-lg);
+    background: var(--warning-bg);
+    color: var(--text-1);
+    font-size: var(--fs-sm);
+    line-height: var(--lh-sm);
+  }
+
+  .ui-approval[data-enter] {
+    animation: pg-rail-rise var(--dur-base) var(--ease-enter);
+  }
+
+  .ui-approval[aria-busy="true"] {
+    cursor: progress;
+  }
+
+  .ui-approval__head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--space-1) var(--space-3);
+  }
+
+  .ui-approval__title {
+    margin: 0;
+    color: var(--warning-text);
+    font-size: var(--fs-md);
+    line-height: var(--lh-md);
+    font-weight: var(--fw-semibold);
+  }
+
+  .ui-approval__title:focus-visible {
+    outline: 2px solid var(--focus);
+    outline-offset: 2px;
+  }
+
+  .ui-approval__expiry {
+    color: var(--text-2);
+    font-size: var(--fs-xs);
+    line-height: var(--lh-xs);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .ui-approval__bar {
+    display: block;
+    height: 4px;
+    overflow: hidden;
+    border-radius: var(--radius-full);
+    background: var(--surface-3);
+  }
+
+  .ui-approval__fill {
+    display: block;
+    height: 100%;
+    background: var(--warning-solid);
+    transform: scaleX(var(--rail-ratio, 1));
+    transform-origin: left center;
+    animation: pg-rail-expire var(--rail-remaining, 600s) linear forwards;
+  }
+
+  .ui-approval__ask,
+  .ui-approval__where,
+  .ui-approval__args,
+  .ui-approval__note {
+    margin: 0;
+  }
+
+  .ui-approval__ask {
+    font-size: var(--fs-md);
+    line-height: var(--lh-md);
+  }
+
+  .ui-approval__where {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-1);
+    color: var(--text-2);
+  }
+
+  .ui-approval__args {
+    color: var(--text-2);
+    font-family: var(--font-mono);
+    font-size: var(--fs-xs);
+    line-height: var(--lh-xs);
+    overflow-wrap: anywhere;
+  }
+
+  .ui-approval__details > summary {
+    width: max-content;
+    color: var(--accent-text);
+    font-weight: var(--fw-semibold);
+    cursor: pointer;
+  }
+
+  .ui-approval__details > summary:focus-visible {
+    outline: 2px solid var(--focus);
+    outline-offset: 2px;
+  }
+
+  .ui-approval__json {
+    max-height: 200px;
+    margin: var(--space-2) 0 0;
+    padding: var(--space-2) var(--space-3);
+    overflow: auto;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--surface-1);
+    font-family: var(--font-mono);
+    font-size: var(--fs-mono);
+    line-height: var(--lh-mono);
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+  }
+
+  .ui-approval__actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: var(--space-2);
+  }
+
+  .ui-approval__note {
+    color: var(--text-2);
+    font-size: var(--fs-xs);
+    line-height: var(--lh-xs);
+  }
+
+  /* Draft card: full text, sources, Inserir / Gerar novamente / Descartar. Stale = warning outline. */
+  .ui-draft {
+    display: grid;
+    gap: var(--space-2);
+    padding: var(--space-3);
+    border: 1px solid var(--agent-border);
+    border-radius: var(--radius-lg);
+    background: var(--agent-bg);
+    color: var(--text-1);
+    font-size: var(--fs-sm);
+    line-height: var(--lh-sm);
+  }
+
+  .ui-draft[data-state="stale"] {
+    border-color: var(--warning-border);
+    border-style: dashed;
+    background: var(--surface-1);
+  }
+
+  .ui-draft__peek {
+    display: inline-flex;
+    align-items: center;
+    justify-self: start;
+    gap: var(--space-1);
+    min-height: var(--target-touch);
+    margin: 0;
+    padding: 0 var(--space-3);
+    border: 1px solid var(--agent-border);
+    border-radius: var(--radius-full);
+    background: var(--agent-bg);
+    color: var(--agent-text);
+    font: inherit;
+    font-weight: var(--fw-semibold);
+    cursor: pointer;
+    transition: background-color var(--dur-fast) var(--ease-standard), border-color var(--dur-fast) var(--ease-standard);
+  }
+
+  .ui-draft__peek:hover {
+    border-color: var(--agent-solid);
+  }
+
+  .ui-draft__peek:focus-visible {
+    outline: 2px solid var(--focus);
+    outline-offset: 2px;
+  }
+
+  .ui-draft[data-state="stale"] .ui-draft__peek {
+    border-color: var(--warning-border);
+    background: var(--warning-bg);
+    color: var(--warning-text);
+  }
+
+  .ui-draft__body {
+    display: grid;
+    gap: var(--space-2);
+    min-width: 0;
+  }
+
+  /* Phones and small windows: the draft starts as the chip "✦ Rascunho pronto · ver". */
+  .ui-draft[data-expanded="false"] {
+    padding: 0;
+    border-color: transparent;
+    background: transparent;
+  }
+
+  .ui-draft[data-expanded="false"] .ui-draft__body {
+    display: none;
+  }
+
+  .ui-draft__head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-1) var(--space-2);
+  }
+
+  .ui-draft__agent {
+    font-weight: var(--fw-semibold);
+  }
+
+  .ui-draft__meta {
+    margin-inline-start: auto;
+    color: var(--text-3);
+    font-size: var(--fs-xs);
+    line-height: var(--lh-xs);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .ui-draft__reveal {
+    display: grid;
+    grid-template-rows: 1fr;
+  }
+
+  .ui-draft__reveal > * {
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  .ui-draft__text {
+    margin: 0;
+    color: var(--text-1);
+    font-size: var(--fs-msg);
+    line-height: var(--lh-msg);
+    font-weight: var(--fw-regular);
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+  }
+
+  .ui-draft[data-reveal] .ui-draft__reveal {
+    animation: pg-rail-rows var(--dur-slow) var(--ease-enter);
+  }
+
+  .ui-draft[data-reveal] .ui-draft__text {
+    animation: pg-rail-fade var(--dur-slow) var(--ease-enter) 80ms both;
+  }
+
+  .ui-draft__stale {
+    margin: 0;
+    color: var(--warning-text);
+    font-weight: var(--fw-semibold);
+  }
+
+  .ui-draft__sources {
+    display: grid;
+    gap: var(--space-1);
+    color: var(--text-2);
+  }
+
+  .ui-draft__confirm {
+    display: grid;
+    gap: var(--space-2);
+    padding: var(--space-2) var(--space-3);
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius-md);
+    background: var(--surface-1);
+  }
+
+  .ui-draft__confirm > p {
+    margin: 0;
+  }
+
+  .ui-draft__note {
+    margin: 0;
+    color: var(--text-2);
+    font-size: var(--fs-xs);
+    line-height: var(--lh-xs);
+  }
+
+  /* Agent state glyph of a list row: static (no loop), always with its text for screen readers. */
+  .ui-agent-glyph {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 18px;
+    height: 18px;
+    border: 1px solid transparent;
+    border-radius: var(--radius-xs);
+    color: var(--agent-text);
+    font-size: var(--fs-xs);
+    line-height: var(--lh-xs);
+  }
+
+  .ui-agent-glyph[data-tone="warning"] {
+    color: var(--warning-text);
+  }
+
+  .ui-agent-glyph[data-tone="stale"] {
+    border-color: var(--warning-border);
+    color: var(--warning-text);
+  }
+
+  @media (min-width: 900px) {
+    .ui-draft__peek {
+      min-height: var(--control-sm);
+    }
+  }
+
+  /* Wide and tall enough (≥1280 × 768): the full draft card is shown. */
+  @media (min-width: 1280px) and (min-height: 768px) {
+    .ui-draft__peek {
+      display: none;
+    }
+
+    .ui-draft[data-expanded="false"] {
+      padding: var(--space-3);
+      border-color: var(--agent-border);
+      background: var(--agent-bg);
+    }
+
+    .ui-draft[data-expanded="false"][data-state="stale"] {
+      border-color: var(--warning-border);
+      background: var(--surface-1);
+    }
+
+    .ui-draft[data-expanded="false"] .ui-draft__body {
+      display: grid;
+    }
+  }
+
+  /* Keyframes (opacity, --shift tokens and scale only) and reduced motion of the components. */
+  @keyframes pg-rail-fade {
+    from {
+      opacity: 0;
+    }
+
+    to {
+      opacity: 1;
+    }
+  }
+
+  @keyframes pg-rail-rise {
+    from {
+      opacity: 0;
+      transform: translateY(var(--shift-sm));
+    }
+
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  @keyframes pg-rail-rows {
+    from {
+      grid-template-rows: 0fr;
+    }
+
+    to {
+      grid-template-rows: 1fr;
+    }
+  }
+
+  @keyframes pg-rail-draw {
+    to {
+      stroke-dashoffset: 0;
+    }
+  }
+
+  @keyframes pg-rail-expire {
+    from {
+      transform: scaleX(var(--rail-ratio, 1));
+    }
+
+    to {
+      transform: scaleX(0);
+    }
+  }
+
+  /* Reduced motion (system or "Reduzidas"): the approval bar stays static (only its text changes), the
+     draft and the receipts only fade (the tokens already shorten durations and zero the shifts). */
+  @media (prefers-reduced-motion: reduce) {
+    .ui-approval__fill,
+    .ui-draft[data-reveal] .ui-draft__reveal {
+      animation: none;
+    }
+
+    .ui-receipt[data-enter] .ui-receipt__check path {
+      animation: none;
+      stroke-dashoffset: 0;
+    }
+  }
+
+  :root[data-motion="reduced"] .ui-approval__fill,
+  :root[data-motion="reduced"] .ui-draft[data-reveal] .ui-draft__reveal {
+    animation: none;
+  }
+
+  :root[data-motion="reduced"] .ui-receipt[data-enter] .ui-receipt__check path {
+    animation: none;
+    stroke-dashoffset: 0;
+  }
+}
+
+@layer screens {
+  /* Rail above the composer: quota > autopilot > approval > draft > status; at most 40% of the height. */
+  .pg-rail {
+    display: grid;
+    gap: var(--space-2);
+    max-height: 40vh;
+    max-height: 40dvh;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    color: var(--text-1);
+    font-size: var(--fs-sm);
+    line-height: var(--lh-sm);
+  }
+
+  .pg-rail__status,
+  .pg-rail__line,
+  .pg-rail__autopilot {
+    display: grid;
+    gap: var(--space-1);
+    padding: var(--space-2) var(--space-3);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    background: var(--surface-1);
+  }
+
+  .pg-rail__status,
+  .pg-rail__autopilot[data-state="active"] {
+    border-color: var(--agent-border);
+    background: var(--agent-bg);
+  }
+
+  .pg-rail__line[data-state="tool_unknown"] {
+    border-color: var(--warning-border);
+    background: var(--warning-bg);
+  }
+
+  .pg-rail__line[data-state="busy"] {
+    border-color: var(--info-border);
+    background: var(--info-bg);
+  }
+
+  .pg-rail__headline,
+  .pg-rail__phase,
+  .pg-rail__text {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-1) var(--space-2);
+    margin: 0;
+  }
+
+  .pg-rail__headline {
+    font-weight: var(--fw-semibold);
+  }
+
+  .pg-rail__title {
+    min-width: 0;
+  }
+
+  .pg-rail__clock {
+    margin-inline-start: auto;
+    color: var(--text-3);
+    font-size: var(--fs-xs);
+    line-height: var(--lh-xs);
+    font-weight: var(--fw-medium);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .pg-rail__phase {
+    color: var(--text-2);
+  }
+
+  .pg-rail__text {
+    flex-wrap: nowrap;
+    align-items: flex-start;
+  }
+
+  .pg-rail__icon {
+    flex: none;
+    width: 16px;
+    height: 16px;
+    margin-top: var(--space-0_5);
+    color: var(--text-2);
+  }
+
+  .pg-rail__line[data-state="tool_unknown"] .pg-rail__icon {
+    color: var(--warning-text);
+  }
+
+  .pg-rail__hint,
+  .pg-rail__countdown {
+    color: var(--text-3);
+    font-size: var(--fs-xs);
+    line-height: var(--lh-xs);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .pg-rail__lookups {
+    display: grid;
+    gap: var(--space-1);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .pg-rail__actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-2);
+  }
+
+  .pg-rail__quota {
+    margin: 0;
+  }
+
+  /* A support session reads who adjusts the quota (no Equipe for it): the text stays legible on the warning tone. */
+  .pg-rail__quota .pg-rail__hint {
+    color: var(--text-2);
+  }
+
+  /* "Gerando": three dots, opacity .3 ↔ 1 in a 1200 ms cycle with a 160 ms stagger. */
+  .pg-rail__dots {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+  }
+
+  .pg-rail__dots i {
+    display: block;
+    width: 6px;
+    height: 6px;
+    border-radius: var(--radius-full);
+    background: var(--agent-solid);
+    opacity: .3;
+    animation: pg-rail-dot 1200ms var(--ease-standard) infinite;
+  }
+
+  .pg-rail__dots i:nth-child(2) {
+    animation-delay: 160ms;
+  }
+
+  .pg-rail__dots i:nth-child(3) {
+    animation-delay: 320ms;
+  }
+
+  /* Agente tab of the context panel. */
+  .pg-rail-tab {
+    display: grid;
+    gap: var(--space-4);
+    color: var(--text-1);
+    font-size: var(--fs-sm);
+    line-height: var(--lh-sm);
+  }
+
+  .pg-rail-tab__agent {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+  }
+
+  .pg-rail-tab__who {
+    display: grid;
+    min-width: 0;
+  }
+
+  .pg-rail-tab__who strong {
+    font-size: var(--fs-md);
+    line-height: var(--lh-md);
+    font-weight: var(--fw-semibold);
+  }
+
+  .pg-rail-tab__who small {
+    color: var(--text-2);
+    font-size: var(--fs-xs);
+    line-height: var(--lh-xs);
+  }
+
+  .pg-rail-tab__agent > .ui-badge {
+    margin-inline-start: auto;
+  }
+
+  .pg-rail-tab__run {
+    display: grid;
+    gap: var(--space-2);
+  }
+
+  .pg-rail-tab__run h3 {
+    margin: 0;
+    font-size: var(--fs-sm);
+    line-height: var(--lh-sm);
+    font-weight: var(--fw-semibold);
+  }
+
+  .pg-rail-tab__steps {
+    display: grid;
+    gap: var(--space-1);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    counter-reset: rail-step;
+  }
+
+  .pg-rail-tab__steps li {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-2);
+    counter-increment: rail-step;
+  }
+
+  .pg-rail-tab__steps li::before {
+    content: counter(rail-step);
+    min-width: 16px;
+    color: var(--text-3);
+    font-size: var(--fs-xs);
+    line-height: var(--lh-sm);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .pg-rail-tab__mark {
+    min-width: 12px;
+    font-weight: var(--fw-bold);
+  }
+
+  .pg-rail-tab__steps li[data-state="done"] .pg-rail-tab__mark {
+    color: var(--success-text);
+  }
+
+  .pg-rail-tab__steps li[data-state="current"] .pg-rail-tab__mark,
+  .pg-rail-tab__steps li[data-state="waiting"] .pg-rail-tab__mark {
+    color: var(--agent-text);
+  }
+
+  .pg-rail-tab__steps li[data-state="warning"] .pg-rail-tab__mark {
+    color: var(--warning-text);
+  }
+
+  .pg-rail-tab__steps li[data-state="error"] {
+    color: var(--danger-text);
+  }
+
+  .pg-rail-tab__form {
+    display: grid;
+    gap: var(--space-2);
+  }
+
+  .pg-rail-tab__field {
+    display: grid;
+    gap: var(--space-1);
+    font-weight: var(--fw-semibold);
+  }
+
+  .pg-rail-tab__field textarea {
+    width: 100%;
+    min-height: 72px;
+    padding: var(--space-2) var(--space-3);
+    border: 1px solid var(--border-control);
+    border-radius: var(--radius-sm);
+    background: var(--surface-1);
+    color: var(--text-1);
+    font-family: var(--font-sans);
+    font-size: var(--fs-lg);
+    line-height: var(--lh-lg);
+    font-weight: var(--fw-regular);
+    resize: vertical;
+  }
+
+  .pg-rail-tab__field textarea:focus-visible {
+    outline: 2px solid var(--focus);
+    outline-offset: 2px;
+  }
+
+  .pg-rail-tab__form > .ui-btn {
+    justify-self: start;
+  }
+
+  .pg-rail-tab__hint {
+    color: var(--text-2);
+    font-size: var(--fs-xs);
+    line-height: var(--lh-xs);
+  }
+
+  /* Terminal outcomes stay legible beside their retry action on a phone. Running work,
+     approvals and drafts keep their complete cards and controls. */
+  @media (max-width: 599.98px) {
+    .pg-rail__line:is([data-state="failed"], [data-state="invalidated"], [data-state="cancelled"], [data-state="rejected"], [data-state="unknown"], [data-state="lookup_failed"], [data-state="draft_unavailable"]) {
+      grid-template-columns: minmax(0, 1fr) auto;
+      align-items: center;
+      column-gap: var(--space-2);
+    }
+
+    .pg-rail__line:is([data-state="failed"], [data-state="invalidated"], [data-state="cancelled"], [data-state="rejected"], [data-state="unknown"], [data-state="lookup_failed"], [data-state="draft_unavailable"]) > .pg-rail__text {
+      grid-column: 1;
+      grid-row: 1;
+      min-width: 0;
+      overflow-wrap: anywhere;
+    }
+
+    .pg-rail__line:is([data-state="failed"], [data-state="invalidated"], [data-state="cancelled"], [data-state="rejected"], [data-state="unknown"], [data-state="lookup_failed"], [data-state="draft_unavailable"]) > .pg-rail__actions {
+      grid-column: 2;
+      grid-row: 1;
+    }
+
+    .pg-rail__line:is([data-state="failed"], [data-state="invalidated"], [data-state="cancelled"], [data-state="rejected"], [data-state="unknown"], [data-state="lookup_failed"], [data-state="draft_unavailable"]) > :not(.pg-rail__text, .pg-rail__actions) {
+      grid-column: 1 / -1;
+    }
+
+    .pg-rail__line > .pg-rail__actions .ui-btn {
+      min-height: var(--target-touch);
+    }
+  }
+
+  @media (min-width: 900px) {
+    .pg-rail-tab__field textarea {
+      font-size: var(--fs-msg);
+      line-height: var(--lh-msg);
+    }
+  }
+
+  @keyframes pg-rail-dot {
+    0%,
+    100% {
+      opacity: .3;
+    }
+
+    50% {
+      opacity: 1;
+    }
+  }
+
+  /* Reduced motion: static text ("… está preparando… 4 s") instead of the dots. */
+  @media (prefers-reduced-motion: reduce) {
+    .pg-rail__dots {
+      display: none;
+    }
+  }
+
+  :root[data-motion="reduced"] .pg-rail__dots {
+    display: none;
+  }
+}

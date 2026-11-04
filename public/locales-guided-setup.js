@@ -1,0 +1,26 @@
+import { registerTranslations } from './i18n.js';
+registerTranslations({
+  'Continuar configuração':'Continue setup',
+  'Adicionar outro':'Add another',
+  'Validação não carregada':'Validation not loaded',
+  'Confira o teste salvo deste canal.':'Check the saved test for this channel.',
+  'Recebimento no destino confirmado':'Receipt at the destination confirmed',
+  'A configuração mudou. Faça um novo teste.':'The configuration changed. Run a new test.',
+  'Confirmação no destino pendente':'Destination confirmation pending',
+  'Continuar teste':'Continue test',
+  'Não foi possível carregar os testes salvos. Tente novamente.':'Could not load saved tests. Try again.',
+  'O teste fica salvo para continuar em outra sessão.':'The test is saved so you can continue in another session.',
+  'Atualizar testes salvos':'Refresh saved tests',
+  'Eu vou atender':'I will handle support',
+  'Comece no Atendimento e convide outras pessoas quando precisar.':'Start in the inbox and invite others when needed.',
+  'Minha equipe':'My team',
+  'Organize as pessoas, os canais e os departamentos permitidos.':'Organize people, permitted channels and departments.',
+  'Meu Hermes':'My Hermes',
+  'Conecte seu Hermes por MCP e escolha o que ele pode fazer.':'Connect your Hermes through MCP and choose what it can do.',
+  'Equipe + Hermes':'Team + Hermes',
+  'Prepare a equipe e conecte seu agente para colaborar no atendimento.':'Prepare your team and connect your agent to collaborate on support.',
+  'Quem vai atender?':'Who will handle support?',
+  'Conectar meu Hermes':'Connect my Hermes',
+  'Organizar minha equipe':'Organize my team',
+  'Selecionado':'Selected'
+});

@@ -1,0 +1,161 @@
+@layer legacy {
+/* Page-specific workspace layouts. The operational inbox keeps its own density. */
+
+/* Accounts and units: generous filters and a legible setup checklist. */
+.accounts-dialog .accounts-review dd {
+  font-size: 14px;
+}
+.accounts-dialog .accounts-review dt {
+  font-size: 12px;
+  line-height: 1.65;
+}
+.accounts-dialog .accounts-review > div {
+  padding: 16px 18px;
+}
+
+/* Contacts and team are directories; their tools should read as a single group. */
+.app-shell[data-view="contacts"] [data-contact-count] {
+  margin-right: auto;
+  font-size: 13px;
+  line-height: 1.65;
+}
+
+/* Agents and integrations: the explanation stays alongside the action. */
+.app-shell[data-view="agents"] .mcp-panel {
+  align-items: flex-start;
+  gap: 24px;
+  padding: 28px;
+}
+.app-shell[data-view="agents"] .mcp-panel > div:nth-child(2) {
+  min-width: 0;
+}
+.app-shell[data-view="agents"] .mcp-panel p {
+  font-size: 14px;
+  line-height: 1.75;
+  max-width: 78ch;
+}
+.app-shell[data-view="agents"] .mcp-panel > .button {
+  flex-shrink: 0;
+  margin-top: 4px;
+}
+
+/* Knowledge: avoid fixed-width cards overflowing a small workspace. */
+.knowledge-grid {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
+  gap: 24px;
+}
+.knowledge-toolbar {
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.knowledge-search {
+  min-width: min(100%, 240px);
+}
+.knowledge-overview-copy p,
+.knowledge-card > p,
+.knowledge-source-versions,
+.knowledge-published-date,
+.knowledge-library-foot {
+  font-size: 13px;
+  line-height: 1.7;
+}
+.knowledge-card-actions {
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.knowledge-card-actions .button {
+  font-size: 13px;
+}
+.knowledge-result-count {
+  display: block;
+  font-size: 12px;
+}
+.knowledge-empty p {
+  font-size: 14px;
+  line-height: 1.75;
+}
+
+/* Automation, indicators and architecture are settings pages, not chat rows. */
+.automation-binding {
+  padding: 24px;
+  gap: 24px;
+}
+.automation-binding > div:first-child {
+  min-width: 0;
+}
+.automation-binding p,
+.automation-binding small {
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+/* Internal collaboration retains its split view, with readable room details. */
+.team-chat-page-heading p,
+.team-chat-rooms-footnote {
+  font-size: 12px;
+  line-height: 1.6;
+}
+.team-chat-search {
+  min-height: 44px;
+}
+.team-chat-search input,
+.team-chat-room-copy small,
+.team-chat-heading-copy p {
+  font-size: 12px;
+}
+.team-chat-room-copy strong {
+  font-size: 14px;
+  line-height: 1.5;
+}
+.team-chat-message-meta strong {
+  font-size: 12px;
+}
+.team-chat-message-meta time {
+  font-size: 11px;
+}
+.team-chat-recipient-review {
+  flex-wrap: wrap;
+  font-size: 12px;
+  line-height: 1.65;
+}
+.team-chat-recipient-review .button {
+  min-height: 44px;
+  font-size: 12px;
+}
+@media (max-width: 1100px) {
+  .app-shell[data-view="agents"] .mcp-panel {
+    flex-wrap: wrap;
+  }
+  .app-shell[data-view="agents"] .mcp-panel > div:nth-child(2) {
+    flex: 1 1 280px;
+  }
+}
+@media (max-width: 760px) {
+  .app-shell[data-view="contacts"] [data-contact-count] {
+    flex-basis: 100%;
+  }
+  .knowledge-grid {
+    padding: 20px;
+    gap: 20px;
+  }
+}
+@media (max-width: 480px) {
+  .app-shell[data-view="agents"] .mcp-panel {
+    padding: 22px;
+  }
+  .accounts-dialog .accounts-review > div {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 5px;
+  }
+  .knowledge-toolbar .knowledge-filter {
+    flex: 1 1 100%;
+    justify-content: space-between;
+  }
+  .knowledge-toolbar .knowledge-result-count {
+    margin-left: 0;
+  }
+  .automation-binding {
+    padding: 20px;
+  }
+}
+}

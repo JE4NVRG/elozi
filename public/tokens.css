@@ -1,0 +1,448 @@
+@layer reset, legacy, tokens, components, shell, screens, utilities;
+
+/*
+ * Design tokens (FRONTEND-V2 §3). Primeiro <link> do painel e do login: declara a ordem das camadas.
+ * - reset (base.css) fica antes do legado; legacy envolve os CSS legados ainda em uso; tokens vem
+ *   depois do legado para que os aliases abaixo vençam qualquer :root legado remanescente.
+ * - Único arquivo com cor hexadecimal (catraca do P1, zerada fora daqui no P10). CSS usa só var(--…).
+ * - Tema escuro liberado no P10 (theme-prefs.js): "Sistema" segue prefers-color-scheme enquanto
+ *   <html> não tem data-theme="light"; "Escuro" aplica data-theme="dark". Os dois blocos escuros
+ *   abaixo têm os mesmos valores (tests/css-layers.test.js confere).
+ * - Contrato com brand-theme.js (P1c): applyBrandTokens(root, tokens) escreve no style de <html>
+ *   --b-<nome>-l e --b-<nome>-d para accent, on-accent, accent-hover, accent-pressed, accent-text,
+ *   accent-soft, accent-soft-border, accent-soft-text, focus e edge, além da rampa --brand-50…950
+ *   (igual nos dois temas). No login, GET /brand.css entrega as mesmas variáveis para a marca do
+ *   endereço (P10). Os padrões abaixo são os da marca #3157d5 (§3.3).
+ */
+@layer tokens {
+  :root {
+    /* Channel brands (Simple Icons, CC0): the same in both themes, only behind their own marks. */
+    --channel-on-brand: #ffffff;
+    --channel-whatsapp: #25d366;
+    --channel-telegram: #26a5e4;
+    --channel-instagram: #ff0069;
+    --channel-instagram-1: #feda75;
+    --channel-instagram-2: #fa7e1e;
+    --channel-instagram-3: #d62976;
+    --channel-instagram-4: #962fbf;
+    --channel-instagram-5: #4f5bd5;
+    --channel-messenger: #00b2ff;
+    --channel-messenger-1: #0099ff;
+    --channel-messenger-2: #a033ff;
+    --channel-messenger-3: #ff5280;
+
+    color-scheme: light;
+
+    /* Marca derivada: padrão #3157d5, claro (-l) e escuro (-d). */
+    --b-accent-l: #3157d5;
+    --b-on-accent-l: #ffffff;
+    --b-accent-hover-l: #2547c4;
+    --b-accent-pressed-l: #1a36b3;
+    --b-accent-text-l: #3157d5;
+    --b-accent-soft-l: #e7efff;
+    --b-accent-soft-border-l: #bdd1ff;
+    --b-accent-soft-text-l: #2546bc;
+    --b-focus-l: #446eee;
+    --b-edge-l: transparent;
+    --b-accent-d: #3961e0;
+    --b-on-accent-d: #ffffff;
+    --b-accent-hover-d: #3157d5;
+    --b-accent-pressed-d: #2a4ecb;
+    --b-accent-text-d: #a0bcff;
+    --b-accent-soft-d: #172757;
+    --b-accent-soft-border-d: #2a4287;
+    --b-accent-soft-text-d: #bdd1ff;
+    --b-focus-d: #84a8fe;
+    --b-edge-d: transparent;
+    --brand-50: #f3f7ff;
+    --brand-100: #e5edfe;
+    --brand-200: #cbdbff;
+    --brand-300: #a5c0fe;
+    --brand-400: #779dfc;
+    --brand-500: #4e7bfc;
+    --brand-600: #3961e0;
+    --brand-700: #2a4cc2;
+    --brand-800: #1e3aa1;
+    --brand-900: #11277a;
+    --brand-950: #061456;
+
+    /* Acento resolvido para o tema claro. */
+    --accent: var(--b-accent-l);
+    --on-accent: var(--b-on-accent-l);
+    --accent-hover: var(--b-accent-hover-l);
+    --accent-pressed: var(--b-accent-pressed-l);
+    --accent-text: var(--b-accent-text-l);
+    --accent-soft: var(--b-accent-soft-l);
+    --accent-soft-border: var(--b-accent-soft-border-l);
+    --accent-soft-text: var(--b-accent-soft-text-l);
+    --focus: var(--b-focus-l);
+    --accent-edge: var(--b-edge-l);
+
+    /* Neutros (§3.2), matiz 262, independentes da marca. */
+    --bg: #f4f7fb;
+    --surface-1: #ffffff;
+    --surface-2: #f1f4f8;
+    --surface-3: #e6eaf0;
+    --border: #dfe3ea;
+    --border-strong: #c6cbd3;
+    --border-control: #818690;
+    --text-1: #141b26;
+    --text-2: #474d59;
+    --text-3: #636975;
+    --text-disabled: #9a9fa6;
+    --scrim: rgb(11 18 32 / .48);
+    --bg-hover: var(--surface-2);
+    --bg-pressed: var(--surface-3);
+    --bg-selected: var(--accent-soft);
+
+    /* Semânticas (§3.4): texto / fundo / borda / sólido. */
+    --success-text: #0d7737;
+    --success-bg: #e4fbe7;
+    --success-border: #b1e3ba;
+    --success-solid: #1c8742;
+    --warning-text: #895706;
+    --warning-bg: #fff1e2;
+    --warning-border: #f3cda1;
+    --warning-solid: #9c6306;
+    --danger-text: #a43b38;
+    --danger-bg: #ffefee;
+    --danger-border: #ffc3bd;
+    --danger-solid: #b54a46;
+    --info-text: #006d91;
+    --info-bg: #e6f6ff;
+    --info-border: #b0dcf2;
+    --info-solid: #1e7ca1;
+    --agent-text: #764aa2;
+    --agent-bg: #f6f0ff;
+    --agent-border: #e0c8fe;
+    --agent-solid: #8559b2;
+    --on-solid: #ffffff;
+    --note-bg: var(--warning-bg);
+    --note-border: var(--warning-border);
+
+    /*
+     * Amostras fixas dos dois temas (prévias de marca lado a lado, P10): não mudam com o tema da página.
+     * São --surface-1/--text-1/--border do claro e --surface-1/--text-1/--border-strong do escuro.
+     */
+    --sample-light-surface: #ffffff;
+    --sample-light-text: #141b26;
+    --sample-light-border: #dfe3ea;
+    --sample-dark-surface: #14171e;
+    --sample-dark-text: #e8ebf1;
+    --sample-dark-border: #3d434c;
+
+    /* Presença: anel de 2 px no avatar, sempre com texto nos menus. */
+    --presence-available: var(--success-solid);
+    --presence-busy: var(--danger-solid);
+    --presence-away: var(--warning-solid);
+    --presence-offline: var(--border-control);
+
+    /* Tipografia (§3.5): tamanho / linha; 12 px é o mínimo absoluto. */
+    --font-sans: "Manrope", "Segoe UI", system-ui, sans-serif;
+    --font-mono: ui-monospace, "Cascadia Code", Consolas, monospace;
+    --fs-xs: 12px;
+    --lh-xs: 16px;
+    --fs-sm: 13px;
+    --lh-sm: 18px;
+    --fs-md: 14px;
+    --lh-md: 20px;
+    --fs-msg: 15px;
+    --lh-msg: 22px;
+    --fs-lg: 16px;
+    --lh-lg: 24px;
+    --fs-xl: 18px;
+    --lh-xl: 26px;
+    --fs-2xl: 22px;
+    --lh-2xl: 28px;
+    --ls-2xl: -.01em;
+    --fs-3xl: 28px;
+    --lh-3xl: 34px;
+    --ls-3xl: -.02em;
+    --fs-mono: 13px;
+    --lh-mono: 20px;
+    --ls-eyebrow: .04em;
+    --fw-regular: 450;
+    --fw-medium: 500;
+    --fw-semibold: 600;
+    --fw-strong: 650;
+    --fw-bold: 700;
+
+    /* Espaço (§3.6), base 4. */
+    --space-0_5: 2px;
+    --space-1: 4px;
+    --space-2: 8px;
+    --space-3: 12px;
+    --space-4: 16px;
+    --space-5: 20px;
+    --space-6: 24px;
+    --space-8: 32px;
+    --space-10: 40px;
+    --space-12: 48px;
+    --space-16: 64px;
+    --gutter: 16px;
+
+    /* Raios. */
+    --radius-xs: 4px;
+    --radius-sm: 6px;
+    --radius-md: 8px;
+    --radius-lg: 12px;
+    --radius-xl: 16px;
+    --radius-full: 999px;
+    --radius-agent: 30%;
+
+    /* Sombras (claro). */
+    --shadow-1: 0 1px 2px rgb(16 24 40 / .06);
+    --shadow-2: 0 4px 12px rgb(16 24 40 / .08), 0 1px 3px rgb(16 24 40 / .06);
+    --shadow-3: 0 12px 32px rgb(16 24 40 / .14);
+    --shadow-4: 0 24px 64px rgb(16 24 40 / .22);
+
+    /* Camadas (z-index); diálogos usam a top layer nativa (showModal). */
+    --z-sticky: 10;
+    --z-sidebar: 20;
+    --z-topbar: 30;
+    --z-popover: 40;
+    --z-drawer: 50;
+    --z-toast: 70;
+    --z-tooltip: 80;
+    --z-skip: 90;
+
+    /* Tamanhos. Abaixo de 900 px o alvo mínimo de toque é --control-lg (44). */
+    --control-sm: 32px;
+    --control-md: 36px;
+    --control-lg: 44px;
+    --target-touch: 44px;
+    --row-height: 64px;
+    --row-height-compact: 48px;
+    --topbar-height: 52px;
+    --sidebar-width: 232px;
+    --sidebar-rail: 64px;
+    --bottombar-height: 56px;
+    --inbox-list-width: 340px;
+    --inbox-list-min: 280px;
+    --inbox-list-max: 480px;
+    --inbox-context-width: 340px;
+    --inbox-context-min: 300px;
+    --inbox-context-max: 440px;
+    --context-drawer-width: 360px;
+    --drawer-min: 360px;
+    --drawer-max: 560px;
+    --dialog-sm: 420px;
+    --dialog-md: 560px;
+    --dialog-lg: 720px;
+
+    /* Movimento (§3.7): sem spring nem overshoot. */
+    --dur-instant: 80ms;
+    --dur-fast: 140ms;
+    --dur-base: 200ms;
+    --dur-slow: 280ms;
+    --dur-count: 600ms;
+    --ease-standard: cubic-bezier(.2, 0, 0, 1);
+    --ease-enter: cubic-bezier(0, 0, .2, 1);
+    --ease-exit: cubic-bezier(.4, 0, 1, 1);
+    --shift-xs: 4px;
+    --shift-sm: 8px;
+    --shift-md: 12px;
+    --shift-lg: 24px;
+    --scale-press: .98;
+    --scale-enter: .98;
+
+    /*
+     * Aliases legados (P1 congelou os valores de styles.css e frontend.css; P10 os liga aos tokens v2,
+     * então as telas legadas acompanham o tema escuro). --sidebar continua no legado (styles.css).
+     */
+    --canvas: var(--bg);
+    --ink: var(--text-1);
+    --muted: var(--text-3);
+    --line: var(--border);
+    --navy: var(--text-1);
+    --mint: var(--success-border);
+    --radius: 14px;
+    --white: var(--surface-1);
+    --teal: var(--info-text);
+    --surface-shadow: var(--shadow-1);
+  }
+
+  @media (min-width: 600px) {
+    :root {
+      --gutter: 24px;
+      --topbar-height: 56px;
+    }
+  }
+
+  @media (min-width: 1280px) {
+    :root {
+      --gutter: 32px;
+    }
+  }
+
+  :root[data-density="compact"] {
+    --row-height: var(--row-height-compact);
+  }
+
+  /* Cor de agente alternativa (teal) quando o matiz da marca fica a menos de 35° do violeta. */
+  :root[data-agent-hue="alt"] {
+    --agent-text: #0b726e;
+    --agent-bg: #dafcf9;
+    --agent-border: #97e5df;
+    --agent-solid: #0b837e;
+  }
+
+  /*
+   * Tema escuro (§3.2–§3.4). "Escuro" no menu da conta aplica data-theme="dark"; "Sistema" (padrão)
+   * segue o sistema enquanto <html> não tiver data-theme="light". Os dois blocos têm os mesmos valores.
+   */
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+
+    --accent: var(--b-accent-d);
+    --on-accent: var(--b-on-accent-d);
+    --accent-hover: var(--b-accent-hover-d);
+    --accent-pressed: var(--b-accent-pressed-d);
+    --accent-text: var(--b-accent-text-d);
+    --accent-soft: var(--b-accent-soft-d);
+    --accent-soft-border: var(--b-accent-soft-border-d);
+    --accent-soft-text: var(--b-accent-soft-text-d);
+    --focus: var(--b-focus-d);
+    --accent-edge: var(--b-edge-d);
+
+    --bg: #0b0e14;
+    --surface-1: #14171e;
+    --surface-2: #1b1f27;
+    --surface-3: #242931;
+    --border: #292e36;
+    --border-strong: #3d434c;
+    --border-control: #6f757f;
+    --text-1: #e8ebf1;
+    --text-2: #c0c4cc;
+    --text-3: #999fa9;
+    --text-disabled: #595e66;
+    --scrim: rgb(0 0 0 / .6);
+
+    --success-text: #83d395;
+    --success-bg: #102b17;
+    --success-border: #244d2e;
+    --success-solid: #1c8742;
+    --warning-text: #ebb16b;
+    --warning-bg: #322008;
+    --warning-border: #583c17;
+    --warning-solid: #9c6306;
+    --danger-text: #fea199;
+    --danger-bg: #381a18;
+    --danger-border: #62322f;
+    --danger-solid: #b54a46;
+    --info-text: #82c8ea;
+    --info-bg: #102732;
+    --info-border: #244758;
+    --info-solid: #1e7ca1;
+    --agent-text: #cfaafb;
+    --agent-bg: #2a1d37;
+    --agent-border: #4b3860;
+    --agent-solid: #8559b2;
+
+    --shadow-1: none;
+    --shadow-2: 0 8px 24px rgb(0 0 0 / .45), inset 0 0 0 1px rgb(255 255 255 / .06);
+    --shadow-3: 0 16px 40px rgb(0 0 0 / .55), inset 0 0 0 1px rgb(255 255 255 / .06);
+    --shadow-4: 0 24px 64px rgb(0 0 0 / .6), inset 0 0 0 1px rgb(255 255 255 / .06);
+  }
+
+  :root[data-theme="dark"][data-agent-hue="alt"] {
+    --agent-text: #49d6cf;
+    --agent-bg: #012b29;
+    --agent-border: #064d4a;
+    --agent-solid: #0b837e;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      color-scheme: dark;
+
+      --accent: var(--b-accent-d);
+      --on-accent: var(--b-on-accent-d);
+      --accent-hover: var(--b-accent-hover-d);
+      --accent-pressed: var(--b-accent-pressed-d);
+      --accent-text: var(--b-accent-text-d);
+      --accent-soft: var(--b-accent-soft-d);
+      --accent-soft-border: var(--b-accent-soft-border-d);
+      --accent-soft-text: var(--b-accent-soft-text-d);
+      --focus: var(--b-focus-d);
+      --accent-edge: var(--b-edge-d);
+
+      --bg: #0b0e14;
+      --surface-1: #14171e;
+      --surface-2: #1b1f27;
+      --surface-3: #242931;
+      --border: #292e36;
+      --border-strong: #3d434c;
+      --border-control: #6f757f;
+      --text-1: #e8ebf1;
+      --text-2: #c0c4cc;
+      --text-3: #999fa9;
+      --text-disabled: #595e66;
+      --scrim: rgb(0 0 0 / .6);
+
+      --success-text: #83d395;
+      --success-bg: #102b17;
+      --success-border: #244d2e;
+      --success-solid: #1c8742;
+      --warning-text: #ebb16b;
+      --warning-bg: #322008;
+      --warning-border: #583c17;
+      --warning-solid: #9c6306;
+      --danger-text: #fea199;
+      --danger-bg: #381a18;
+      --danger-border: #62322f;
+      --danger-solid: #b54a46;
+      --info-text: #82c8ea;
+      --info-bg: #102732;
+      --info-border: #244758;
+      --info-solid: #1e7ca1;
+      --agent-text: #cfaafb;
+      --agent-bg: #2a1d37;
+      --agent-border: #4b3860;
+      --agent-solid: #8559b2;
+
+      --shadow-1: none;
+      --shadow-2: 0 8px 24px rgb(0 0 0 / .45), inset 0 0 0 1px rgb(255 255 255 / .06);
+      --shadow-3: 0 16px 40px rgb(0 0 0 / .55), inset 0 0 0 1px rgb(255 255 255 / .06);
+      --shadow-4: 0 24px 64px rgb(0 0 0 / .6), inset 0 0 0 1px rgb(255 255 255 / .06);
+    }
+
+    :root:not([data-theme="light"])[data-agent-hue="alt"] {
+      --agent-text: #49d6cf;
+      --agent-bg: #012b29;
+      --agent-border: #064d4a;
+      --agent-solid: #0b837e;
+    }
+  }
+
+  /* Movimento reduzido: preferência do sistema ou escolha "Reduzidas" (data-motion). */
+  @media (prefers-reduced-motion: reduce) {
+    :root {
+      --dur-instant: 0ms;
+      --dur-fast: 120ms;
+      --dur-base: 120ms;
+      --dur-slow: 120ms;
+      --dur-count: 0ms;
+      --shift-xs: 0px;
+      --shift-sm: 0px;
+      --shift-md: 0px;
+      --shift-lg: 0px;
+      --scale-press: 1;
+      --scale-enter: 1;
+    }
+  }
+
+  :root[data-motion="reduced"] {
+    --dur-instant: 0ms;
+    --dur-fast: 120ms;
+    --dur-base: 120ms;
+    --dur-slow: 120ms;
+    --dur-count: 0ms;
+    --shift-xs: 0px;
+    --shift-sm: 0px;
+    --shift-md: 0px;
+    --shift-lg: 0px;
+    --scale-press: 1;
+    --scale-enter: 1;
+  }
+}

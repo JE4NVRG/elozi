@@ -1,0 +1,40 @@
+{
+  "name": "elozi",
+  "version": "0.68.1",
+  "description": "Open-source customer-service inbox: WhatsApp, Telegram, web chat and e-mail with guarded AI agents and MCP.",
+  "license": "MIT",
+  "author": "Jean Carlos Vargas da Silva <jean@je4ndev.com> (https://je4ndev.com)",
+  "homepage": "https://elozi.je4ndev.com",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/JE4NVRG/elozi.git"
+  },
+  "bugs": {
+    "url": "https://github.com/JE4NVRG/elozi/issues"
+  },
+  "private": true,
+  "type": "module",
+  "bin": {
+    "elozi-agent-mcp": "scripts/elozi-agent-mcp.mjs",
+    "elozi-agent-listen": "scripts/elozi-agent-listen.mjs"
+  },
+  "engines": {
+    "node": ">=24.0.0"
+  },
+  "scripts": {
+    "start": "node src/server.js",
+    "agents:validate": "node scripts/validate-agents.mjs",
+    "test": "node --test --test-concurrency=4 tests/*.test.js",
+    "verify": "node scripts/verify.mjs",
+    "check": "node scripts/check.mjs"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "1.31.0",
+    "@whiskeysockets/baileys": "7.0.0-rc14",
+    "ajv": "8.20.0",
+    "jose": "6.2.12",
+    "pg": "8.23.1",
+    "qrcode": "1.5.4",
+    "teleproto": "1.229.3"
+  }
+}

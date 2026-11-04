@@ -1,0 +1,62 @@
+@layer components {
+  #modal:has([data-webchat-install-guide]) { width: min(1120px, calc(100vw - 32px)); max-width: calc(100vw - 32px); max-height: calc(100dvh - 32px); }
+  .webchat-install { display: grid; gap: var(--space-6); min-width: 0; font-family: var(--font-sans); color: var(--text-1); font-size: var(--fs-md); line-height: var(--lh-md); }
+  .webchat-install *, .webchat-install *::before, .webchat-install *::after { box-sizing: border-box; min-width: 0; }
+  .webchat-install__progress ol { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--space-2); list-style: none; padding: 0; margin: 0; }
+  .webchat-install__progress .button { display: flex; align-items: center; justify-content: flex-start; gap: var(--space-2); width: 100%; min-height: var(--target-touch); border-color: var(--border); padding: var(--space-2) var(--space-3); color: var(--text-2); font-size: var(--fs-sm); line-height: var(--lh-sm); text-align: left; white-space: normal; }
+  .webchat-install__number { display: grid; place-items: center; flex: 0 0 var(--space-6); width: var(--space-6); height: var(--space-6); border-radius: var(--radius-full); background: var(--surface-2); color: var(--text-3); font-weight: var(--fw-semibold); font-variant-numeric: tabular-nums; }
+  .webchat-install__progress .button[aria-current=step] { border-color: var(--accent-soft-border); background: var(--accent-soft); color: var(--accent-soft-text); }
+  .webchat-install__progress [aria-current=step] .webchat-install__number { background: var(--accent); color: var(--on-accent); }
+  .webchat-install__heading { display: flex; gap: var(--space-4); align-items: flex-start; justify-content: space-between; padding-block: var(--space-2); }
+  .webchat-install__eyebrow { margin: 0 0 var(--space-2); color: var(--text-3); font-size: var(--fs-xs); font-weight: var(--fw-semibold); letter-spacing: .04em; }
+  .webchat-install__heading h3 { margin: 0; font-size: var(--fs-2xl); line-height: var(--lh-xl); letter-spacing: -.03em; color: var(--text-1); }
+  .webchat-install__heading p:not(.webchat-install__eyebrow) { max-width: 70ch; margin: var(--space-3) 0 0; color: var(--text-2); font-size: var(--fs-md); line-height: var(--lh-lg); }
+  .webchat-install__server-status { flex-shrink: 0; max-width: 32%; padding: var(--space-2) var(--space-3); border-radius: var(--radius-md); border: 1px solid var(--border); color: var(--text-3); background: var(--surface-2); font-size: var(--fs-xs); line-height: var(--lh-sm); }
+  .webchat-install__server-status[data-ready=true] { border-color: var(--success-border); color: var(--success-text); background: var(--success-bg); }
+  .webchat-install__content, .webchat-install__installation, .webchat-install__validation { display: grid; gap: var(--space-4); min-width: 0; }
+  .webchat-install__authorization { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(240px, .85fr); gap: var(--space-6); align-items: start; }
+  .webchat-install__authorization form { display: grid; gap: var(--space-4); }
+  .webchat-install .person-scope { margin: 0; padding: var(--space-4); border-color: var(--border); border-radius: var(--radius-lg); background: var(--surface-1); }
+  .webchat-install .person-scope legend { color: var(--text-1); font-size: var(--fs-sm); font-weight: var(--fw-semibold); padding-inline: var(--space-1); }
+  .webchat-install label { font-size: var(--fs-sm); line-height: var(--lh-md); }
+  .webchat-install label textarea, .webchat-install label input:not([type=checkbox]):not([type=radio]):not([type=color]) { width: 100%; max-width: 100%; min-height: var(--target-touch); font-size: var(--fs-md); }
+  .webchat-install .checkbox-label { display: flex; align-items: center; gap: var(--space-2); min-height: var(--target-touch); }
+  .webchat-install small { font-size: var(--fs-xs); line-height: var(--lh-md); color: var(--text-3); }
+  .webchat-install .accounts-review { margin: 0; padding: var(--space-4); background: var(--surface-2); border-radius: var(--radius-lg); }
+  .webchat-install .accounts-review dd { overflow-wrap: anywhere; color: var(--text-1); }
+  .webchat-install .modal-actions { flex-wrap: wrap; margin-top: 0; gap: var(--space-2); }
+  .webchat-install .button { min-height: var(--target-touch); font-size: var(--fs-sm); line-height: var(--lh-sm); white-space: normal; }
+  .webchat-install__platforms, .webchat-install__service-links { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+  .webchat-install__platforms .button[aria-pressed=true] { background: var(--accent-soft); border-color: var(--accent-soft-border); color: var(--accent-soft-text); }
+  .webchat-install__instructions { padding: var(--space-5); border: 1px solid var(--border); border-radius: var(--radius-lg); background: var(--surface-2); }
+  .webchat-install h4 { margin: 0; font-size: var(--fs-lg); line-height: var(--lh-lg); color: var(--text-1); }
+  .webchat-install__instructions ol { display: grid; gap: var(--space-3); padding-left: var(--space-5); margin: var(--space-4) 0 0; color: var(--text-2); font-size: var(--fs-md); line-height: var(--lh-lg); }
+  .webchat-install__instructions li { padding-left: var(--space-1); }
+  .webchat-install__instructions li::marker { font-weight: var(--fw-semibold); color: var(--accent-text); }
+  .webchat-install__instructions p { margin: var(--space-4) 0 0; color: var(--text-3); font-size: var(--fs-sm); }
+  .webchat-install__code { display: grid; gap: var(--space-3); padding: var(--space-5); border: 1px solid var(--border); border-radius: var(--radius-lg); background: var(--surface-1); }
+  .webchat-install__code-heading { display: flex; flex-wrap: wrap; gap: var(--space-3); justify-content: space-between; align-items: center; }
+  .webchat-install__code textarea { min-height: 118px; font-family: var(--font-mono); font-size: var(--fs-sm); line-height: var(--lh-lg); overflow-wrap: anywhere; word-break: break-all; resize: vertical; }
+  .webchat-install__code [data-webchat-copy-status] { margin: 0; color: var(--text-2); font-size: var(--fs-sm); line-height: var(--lh-md); }
+  .webchat-install__note, .webchat-install__draft, .webchat-install__prerequisite { margin: 0; padding: var(--space-3) var(--space-4); border-left: 3px solid var(--accent-soft-border); background: var(--surface-2); color: var(--text-2); font-size: var(--fs-sm); line-height: var(--lh-lg); }
+  .webchat-install__draft { border-color: var(--warning-border); background: var(--warning-bg); color: var(--warning-text); }
+  .webchat-install__service { display: grid; gap: var(--space-3); padding: var(--space-5); border: 1px solid var(--border); border-radius: var(--radius-lg); background: var(--surface-2); }
+  .webchat-install__service p { margin: var(--space-2) 0 0; color: var(--text-2); font-size: var(--fs-sm); line-height: var(--lh-lg); }
+  .webchat-install__navigation { display: flex; gap: var(--space-3); justify-content: space-between; align-items: center; padding-top: var(--space-4); border-top: 1px solid var(--border); }
+  .webchat-install__navigation-next { margin-left: auto; }
+  .webchat-install :is(button,a,input,textarea,select,summary):focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; scroll-margin-block: var(--space-6); }
+  .webchat-install [data-webchat-guide-heading]:focus { outline: none; }
+  @media (max-width: 900px) {
+    .webchat-install { gap: var(--space-4); }
+    .webchat-install__authorization { grid-template-columns: minmax(0, 1fr); gap: var(--space-4); }
+    .webchat-install__progress ol { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .webchat-install__progress .button { padding: var(--space-2); }
+    .webchat-install__heading { flex-direction: column; gap: var(--space-3); }
+    .webchat-install__server-status { max-width: 100%; }
+    .webchat-install__heading h3 { font-size: var(--fs-xl); }
+    .webchat-install__instructions, .webchat-install__code, .webchat-install__service { padding: var(--space-4); }
+    .webchat-install__navigation .button, .webchat-install__navigation-next { flex: 1; }
+    .webchat-install__navigation-next .button { width: 100%; }
+  }
+  @media (prefers-reduced-motion: reduce) { .webchat-install .button { transition: none; } }
+}

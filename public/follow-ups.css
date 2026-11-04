@@ -1,0 +1,41 @@
+/* Scoped to the existing Atendimento tab host; all colors reuse product semantic tokens. */
+@layer screens {
+#conversation-follow-ups { min-width:0; }
+#conversation-follow-ups .follow-ups-panel { display:grid;gap:12px;padding:16px;color:var(--text-1);background:var(--surface-1);border:1px solid var(--border);border-radius:var(--radius,8px);min-width:0; }
+#conversation-follow-ups .follow-ups-panel h3,
+#conversation-follow-ups .follow-ups-panel h4 { margin:0;font-size:inherit;font-weight:700; }
+#conversation-follow-ups .follow-up-list { list-style:none;margin:0;padding:0;display:grid;gap:12px; }
+#conversation-follow-ups .follow-up-item { display:grid;gap:8px;padding:12px;border:1px solid var(--border);border-radius:8px;min-width:0;background:var(--surface-1); }
+#conversation-follow-ups .follow-up-heading { display:flex;justify-content:space-between;align-items:flex-start;gap:8px;min-width:0; }
+#conversation-follow-ups .follow-up-heading strong { min-width:0;overflow-wrap:anywhere; }
+#conversation-follow-ups .follow-up-copy { white-space:pre-wrap;overflow-wrap:anywhere;color:var(--text-2); }
+#conversation-follow-ups p,
+#conversation-follow-ups small { overflow-wrap:anywhere; }
+#conversation-follow-ups small { color:var(--text-3); }
+#conversation-follow-ups .row-actions { display:flex;flex-wrap:wrap;gap:8px; }
+#conversation-follow-ups .button { min-height:44px;white-space:normal; }
+#conversation-follow-ups .button:active:not(:disabled) { background:var(--surface-3);transform:translateY(1px); }
+#conversation-follow-ups .button.primary:active:not(:disabled) { background:var(--accent);filter:brightness(.94); }
+#conversation-follow-ups .follow-up-form { display:grid;gap:12px;padding:12px;border:1px solid var(--border-control);border-radius:8px;background:var(--surface-2); }
+#conversation-follow-ups .follow-up-form label { display:grid;gap:6px;color:var(--text-2); }
+#conversation-follow-ups .follow-up-form input,
+#conversation-follow-ups .follow-up-form select,
+#conversation-follow-ups .follow-up-form textarea { box-sizing:border-box;display:block;width:100%;min-width:0;max-width:100%;min-height:44px;padding:10px;border:1px solid var(--border-control);border-radius:8px;background:var(--surface-1);color:var(--text-1);font:inherit; }
+#conversation-follow-ups .follow-up-form textarea { min-height:88px;resize:vertical; }
+#conversation-follow-ups :is(button,input,select,textarea):focus-visible { outline:3px solid var(--focus);outline-offset:2px; }
+#conversation-follow-ups .form-error { color:var(--danger-text,var(--text-1)); }
+@media(max-width:600px) {
+  #conversation-follow-ups .follow-ups-panel { padding:12px; }
+  #conversation-follow-ups .follow-up-heading { flex-wrap:wrap; }
+  #conversation-follow-ups .row-actions .button { flex:1 1 140px; }
+}
+@media(prefers-reduced-motion:reduce) {
+  #conversation-follow-ups .button,
+  #conversation-follow-ups .button:active:not(:disabled) { transition:none;transform:none; }
+}
+}
+
+/* Hidden wins over screen layout declarations without escalating importance. */
+@layer utilities {
+#conversation-follow-ups [hidden] { display:none; }
+}

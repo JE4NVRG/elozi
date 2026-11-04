@@ -1,0 +1,45 @@
+Elozi
+Copyright (c) 2026 Jean Carlos Vargas da Silva / JE4NDEV
+
+Elozi's own source code is licensed under the MIT License (see LICENSE).
+
+Third-party components
+----------------------
+Elozi depends on open-source packages that keep their own licenses. Most are
+permissive (MIT, ISC, BSD-2-Clause, BSD-3-Clause, Apache-2.0, 0BSD,
+BlueOak-1.0.0, Unlicense). Two cases deserve attention:
+
+1. WhatsApp connector -> GPL-3.0 code.
+   The WhatsApp QR connector uses @whiskeysockets/baileys (MIT), which depends
+   on libsignal (GPL-3.0) for the Signal protocol encryption. The MIT license
+   of Elozi does not change libsignal's license. In plain words: if you
+   distribute a build that bundles Baileys/libsignal (for example a Docker
+   image, installer or tarball with node_modules), the libsignal part comes
+   with GPL-3.0 obligations (offer its source and keep its license notice).
+   Distributing only the Elozi source code (without node_modules) does not
+   bundle libsignal, but libsignal itself is always GPL-3.0. If you need a
+   distribution without GPL-3.0 code, remove the WhatsApp QR connector and
+   use the official WhatsApp Business Cloud API instead.
+
+2. Image processing -> LGPL-3.0 binaries.
+   sharp (Apache-2.0), used by Baileys, loads prebuilt libvips binaries
+   (@img/sharp-libvips-*, LGPL-3.0-or-later) as unmodified, replaceable shared
+   libraries. Keep their license notices when you redistribute them.
+
+Other notable components
+------------------------
+- @modelcontextprotocol/sdk (MIT)
+- teleproto (MIT) - Telegram client
+- pg (MIT) - PostgreSQL client
+- ajv (MIT), jose (MIT), qrcode (MIT)
+- Manrope font (SIL Open Font License 1.1), see public/fonts/LICENSE
+
+The complete list is in package-lock.json; you can print it with
+`npx license-checker --production --summary`.
+
+Trademarks
+----------
+"Elozi" and "JE4NDEV", and their logos, are not licensed under the MIT
+License; see TRADEMARK.md. "WhatsApp", "Telegram" and other third-party names
+are trademarks of their owners. Elozi is not affiliated with, endorsed by or
+sponsored by Meta/WhatsApp or Telegram.

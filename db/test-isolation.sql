@@ -1,0 +1,33 @@
+\set ON_ERROR_STOP on
+BEGIN;
+INSERT INTO mepchat.resellers(id,name) VALUES('qa-r','QA');
+INSERT INTO mepchat.users(id,display_name) VALUES('qa-user','QA'),('qa-other','Other');
+INSERT INTO mepchat.tenants(id,reseller_id,name) VALUES('qa-a','qa-r','A'),('qa-b','qa-r','B');
+INSERT INTO mepchat_private.tenant_memberships VALUES('qa-a','qa-user','operator',true),('qa-b','qa-other','admin',true);
+INSERT INTO mepchat.channels(tenant_id,id,kind,name) VALUES('qa-a','qa-ca','webchat','A'),('qa-b','qa-cb','telegram','B');
+INSERT INTO mepchat.contacts(tenant_id,id,name) VALUES('qa-a','qa-contact','QA');
+SET LOCAL ROLE mepchat_app;
+DO $$ BEGIN IF EXISTS(SELECT 1 FROM mepchat.channels) THEN RAISE EXCEPTION 'Sem contexto expôs dados'; END IF; END $$;
+SELECT set_config('mepchat.user_id','qa-user',true),set_config('mepchat.tenant_id','qa-a',true);
+DO $$ BEGIN
+ IF (SELECT count(*) FROM mepchat.channels)<>1 THEN RAISE EXCEPTION 'Leitura da própria empresa falhou'; END IF;
+ IF EXISTS(SELECT 1 FROM mepchat.channels WHERE tenant_id='qa-b') THEN RAISE EXCEPTION 'Vazamento entre empresas'; END IF;
+ BEGIN INSERT INTO mepchat.channels(tenant_id,id,kind,name) VALUES('qa-b','bad','webchat','Invalid'); RAISE EXCEPTION 'Escrita cruzada permitida'; EXCEPTION WHEN insufficient_privilege THEN NULL; END;
+ BEGIN INSERT INTO mepchat.conversations(tenant_id,id,channel_id,contact_id) VALUES('qa-a','bad','qa-cb','qa-contact'); RAISE EXCEPTION 'FK cruzada permitida'; EXCEPTION WHEN foreign_key_violation THEN NULL; END;
+ BEGIN UPDATE mepchat_private.tenant_memberships SET role='admin'; RAISE EXCEPTION 'App elevou permissão'; EXCEPTION WHEN insufficient_privilege THEN NULL; END;
+ BEGIN INSERT INTO mepchat.flows(tenant_id,id,name) VALUES('qa-a','bad-flow','Invalid'); RAISE EXCEPTION 'Operador administrou fluxos'; EXCEPTION WHEN insufficient_privilege THEN NULL; END;
+ BEGIN INSERT INTO mepchat.approvals(tenant_id,id,run_id,conversation_version,content_hash,approver_id,expires_at) VALUES('qa-a','bad','x',1,'x','qa-other',now()); RAISE EXCEPTION 'App fabricou aprovação'; EXCEPTION WHEN insufficient_privilege THEN NULL; END;
+END $$;
+SELECT set_config('mepchat.tenant_id','qa-b',true);
+DO $$ BEGIN IF EXISTS(SELECT 1 FROM mepchat.channels) THEN RAISE EXCEPTION 'Tenant arbitrário ultrapassou membership'; END IF; END $$;
+RESET ROLE;
+UPDATE mepchat.users SET disabled_at=now() WHERE id='qa-user';
+SET LOCAL ROLE mepchat_app;
+SELECT set_config('mepchat.tenant_id','qa-a',true);
+DO $$ BEGIN IF EXISTS(SELECT 1 FROM mepchat.channels) THEN RAISE EXCEPTION 'Principal desabilitado manteve acesso'; END IF; END $$;
+ROLLBACK;
+BEGIN;
+SET LOCAL ROLE mepchat_app;
+DO $$ BEGIN IF EXISTS(SELECT 1 FROM mepchat.channels) THEN RAISE EXCEPTION 'Contexto vazou após transação'; END IF; END $$;
+ROLLBACK;
+SELECT 'PASS: RLS, membership, FK entre empresas, sem autoelevação e contexto transacional' AS result;
