@@ -1,26 +1,52 @@
 {
   "name": "elozi-mcp",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "mcpName": "com.je4ndev.elozi/mcp",
   "description": "Connect MCP desktop agents (Claude, Cursor, Codex) to Elozi customer service: read authorized conversations, draft or send replies and hand over to humans with a scoped, revocable agent token.",
   "type": "module",
-  "bin": { "elozi-mcp": "bin/elozi-mcp.mjs" },
+  "bin": {
+    "elozi-mcp": "bin/elozi-mcp.mjs"
+  },
   "exports": "./src/bridge.mjs",
-  "files": ["bin", "src", "README.md", "LICENSE"],
-  "engines": { "node": ">=22" },
+  "files": [
+    "bin",
+    "src",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=22"
+  },
   "scripts": {
     "test": "node --test --test-concurrency=1 test/*.test.mjs",
     "start": "node bin/elozi-mcp.mjs"
   },
-  "keywords": ["mcp", "model-context-protocol", "elozi", "customer-service", "whatsapp", "telegram", "helpdesk", "claude-desktop", "ai-agents"],
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "elozi",
+    "customer-service",
+    "whatsapp",
+    "telegram",
+    "helpdesk",
+    "claude-desktop",
+    "ai-agents"
+  ],
   "homepage": "https://elozi.je4ndev.com",
-  "repository": { "type": "git", "url": "https://elozi.je4ndev.com" },
-  "bugs": { "url": "https://elozi.je4ndev.com" },
+  "repository": {
+    "type": "git",
+    "url": "https://elozi.je4ndev.com"
+  },
+  "bugs": {
+    "url": "https://elozi.je4ndev.com"
+  },
   "author": "Jean Carlos Vargas da Silva / JE4NDEV",
   "license": "MIT",
-  "publishConfig": { "access": "public" },
+  "publishConfig": {
+    "access": "public"
+  },
   "dependencies": {
-    "@modelcontextprotocol/sdk": "1.31.0",
-    "zod": "4.6.5"
+    "@modelcontextprotocol/sdk": "1.32.2",
+    "zod": "4.6.7"
   }
 }

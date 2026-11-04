@@ -163,3 +163,19 @@ test('English public hash and installed PWA retain locale through sign-in', () =
     assert.deepEqual(actual, expected);
   }
 });
+
+
+test('open-source links: npm elozi-mcp and the MIT GitHub repo appear on the home and in every footer, in PT and EN', () => {
+  const site = createPublicSite({ origin });
+  const npm = 'https://www.npmjs.com/package/elozi-mcp', gh = 'https://github.com/JE4NVRG/elozi';
+  const ptHome = page(site, '/'), enHome = page(site, '/en/');
+  assert.ok(ptHome.includes(`<a href="${npm}" rel="noopener">Pacote elozi-mcp no npm</a>`));
+  assert.ok(ptHome.includes(`<a href="${gh}" rel="noopener">Código aberto no GitHub (MIT)</a>`));
+  assert.ok(enHome.includes('elozi-mcp package on npm') && enHome.includes('Open source on GitHub (MIT)'));
+  assert.ok(!enHome.includes('Pacote elozi-mcp no npm') && !enHome.includes('Código aberto'));
+  for (const [pt, en] of pairs) for (const [path, title] of [[pt, 'Código aberto'], [en, 'Open source']]) {
+    const footer = page(site, path).match(/<footer[\s\S]*?<\/footer>/)[0];
+    assert.ok(footer.includes(`<h2>${title}</h2>`), path);
+    assert.ok(footer.includes(`href="${gh}"`) && footer.includes(`href="${npm}"`), path);
+  }
+});
